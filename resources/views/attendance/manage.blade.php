@@ -78,6 +78,8 @@
 
                         <td class="rounded-br-lg">
                             <button data-info-id="{{ $info->id }}" data-modal-btn="openViewLogsModal" class="p-1 px-2 rounded bg-blue-500 text-white font-bold">VIEW LOGS</button>
+                            <a href="/attendance/record/csv/{{ $info->id }}" class="p-1 px-2 rounded bg-gray-500 text-white">CSV</a>
+                            <a href="/attendance/record/pdf/{{ $info->id }}" class="p-1 px-2 rounded bg-gray-500 text-white">PDF</a>
                         </td>
                     </tr>
                     @endforeach

@@ -64,6 +64,8 @@ Route::controller(AttendanceController::class)
     ->middleware('role:Teacher')
     ->group(function () {
         Route::get('/attendance', 'index');
+        Route::get('/attendance/record/csv/{info}', 'generate_csv_file');
+        Route::get('/attendance/record/pdf/{info}', 'generate_pdf_file');
     });
 
 Route::get('/login', [AuthController::class, 'loginView'])

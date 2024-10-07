@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     @vite('resources/css/app.css')
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://printjs-4de6.kxcdn.com/print.min.css">
     <title>@yield('title')</title>
 </head>
 
@@ -63,6 +64,7 @@
         @yield('content')
     </div>
 
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
     @yield('script')
 </body>
 

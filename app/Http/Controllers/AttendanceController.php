@@ -28,6 +28,36 @@ class AttendanceController extends Controller
         return view('attendance.manage')->with('infos', $infos);
     }
 
+    public function generate_csv_file(StudentInfo $info)
+    {
+        $handle = fopen('php://output', 'w');
+
+        $cb = function () use ($handle, $info) {
+            $logs = $info->gateLogs()->get();
+
+            fputcsv($handle, ['DATE', 'TIME', 'ACTION']);
+            foreach ($logs as $log) {
+                fputcsv($handle, [$log->day, $log->time, $log->type]);
+            }
+        };
+
+        $fileName = $info->last_name . '_attendance_logs.csv';
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ]; 
+
+        return response()->stream($cb, 200, $headers);
+    }
+
+    public function generate_pdf_file(StudentInfo $info)
+    {
+        return view('attendance.pdf-generate', ['info' => $info]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
