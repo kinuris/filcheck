@@ -34,7 +34,11 @@ Route::controller(TeacherController::class)
     ->middleware('role:Teacher')
     ->group(function () {
         Route::get('/teacher/dashboard', 'dashboardView');
+    });
 
+Route::controller(TeacherController::class)
+    ->middleware('role:Admin')
+    ->group(function () {
         Route::get('/teacher', 'index');
 
         Route::get('/teacher/create', 'create');
