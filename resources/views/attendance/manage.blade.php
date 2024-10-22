@@ -26,8 +26,8 @@
             <table class="w-full shadow-lg">
                 <thead class="bg-blue-500 text-blue-950">
                     <th class="rounded-tl-lg p-2">#</th>
-                    <th>FULL NAME</th>
                     <th>STUDENT ID</th>
+                    <th>FULL NAME</th>
                     <th>LEVEL</th>
                     <th>SECTION</th>
                     <th>DATE</th>

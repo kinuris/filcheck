@@ -11,7 +11,7 @@
 </head>
 
 <body>
-    <div class="flex w-screen">
+    <div class="flex w-screen min-w-[1200px]">
         <div class="bg-blue-950 text-white h-screen min-w-[max(20%,300px)]">
             <div class="bg-white m-1 mt-7 mb-3 rounded-lg max-w-56 min-w-56 min-h-56 mx-auto">
                 <img class="aspect-square object-cover rounded-lg shadow-lg shadown-black" src="{{ fake()->imageUrl() }}" alt="">

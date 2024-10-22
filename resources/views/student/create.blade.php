@@ -26,7 +26,7 @@
                             <div class="flex relative justify-center place-items-center aspect-square border-2 border-dashed border-slate-400 rounded-lg mb-5 bg-gray-50">
                                 <img class="hidden object-cover aspect-square" name="profile" alt="Profile Preview" id="preview">
                                 <p id="profile-tag">Profile Picture</p>
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('profile') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('profile') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex mt-2">
@@ -42,31 +42,31 @@
                             <div class="flex flex-col px-3 relative">
                                 <label class="font-semibold text-lg text-blue-950" for="rfid">RFID TAG</label>
                                 <input value="{{ old('rfid') }}" class="bg-[#c3e8f8] border-black border rounded-lg px-2 py-1" type="text" name="rfid" id="rfid" readonly>
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('rfid') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('rfid') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-lg text-blue-950" for="student_number">STUDENT NUMBER</label>
                                 <input value="{{ old('student_number') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('student_number') border-red-500 @enderror" type="text" name="student_number" id="student_number">
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('student_number') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('student_number') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-lg text-blue-950" for="firstname">FIRST NAME</label>
                                 <input value="{{ old('first_name') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('first_name') border-red-500 @enderror" type="text" name="first_name" id="firstname">
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('first_name') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('first_name') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-lg text-blue-950" for="middlename">MIDDLE NAME</label>
                                 <input value="{{ old('middle_name') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('middle_name') border-red-500 @enderror" type="text" name="middle_name" id="middlename">
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('middle_name') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('middle_name') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-lg text-blue-950" for="lastname">LAST NAME</label>
                                 <input value="{{ old('last_name') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('last_name') border-red-500 @enderror" type="text" name="last_name" id="lastname">
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('last_name') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('last_name') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
@@ -88,46 +88,57 @@
                                 <p class="text-red-500 text-xs mt-1 absolute -bottom-5">@error('gender') {{ $message }} @enderror</p>
                             </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
+                            <div class="flex flex-col px-3 my-3  relative">
                                 <label class="font-semibold text-lg text-blue-950" for="birthdate">BIRTHDATE</label>
                                 <input value="{{ old('birthdate') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('birthdate') border-red-500 @enderror" type="date" name="birthdate" id="birthdate">
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-5">@error('birthdate') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-5 right-3">@error('birthdate') {{ $message }} @enderror</p>
                             </div>
                         </div>
 
                         <div class="flex-[3] border-l border-gray-400 flex flex-col">
                             <h1 class="text-center mt-3 text-blue-950 text-xl font-semibold mb-4">IN CASE OF EMERGENCY</h1>
 
-                            <div class="flex flex-col px-3 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="phone">PHONE NUMBER</label>
-                                <input value="{{ old('phone_number') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('phone_number') border-red-500 @enderror" type="tel" name="phone_number" id="phone">
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('phone_number') {{ $message }} @enderror</p>
+                            <div class="flex">
+                                <div class="flex flex-col px-3 relative flex-1">
+                                    <label class="font-semibold text-lg text-blue-950" for="phone">PHONE NUMBER</label>
+                                    <input value="{{ old('phone_number') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('phone_number') border-red-500 @enderror" type="tel" name="phone_number" id="phone">
+                                    <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('phone_number') {{ $message }} @enderror</p>
+                                </div>
+                                <div class="flex flex-col relative place-items-center justify-center mr-3">
+                                    <label for="sms_activated" title="SMS delivery for this student">SMS</label>
+                                    <input class="w-5 h-5" type="checkbox" name="sms_activated" id="sms_activated">
+                                </div>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-sm text-blue-950" for="guardian">PARENT /<br>GUARDIANS</label>
                                 <input value="{{ old('guardian') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('guardian') border-red-500 @enderror" type="tel" name="guardian" id="guardian">
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('guardian') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('guardian') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-lg text-blue-950" for="address">ADDRESS</label>
                                 <textarea class="bg-[#ADE3FE] border-black border rounded-lg min-h-28 max-h-28 px-2 py-1 @error('address') border-red-500 @enderror" name="address" id="address">{{ old('address') }}</textarea>
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('address') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('address') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="border-b border-gray-400 my-4"></div>
                             <h1 class="text-center text-blue-950 text-xl font-semibold">LEVEL & SECTION</h1>
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-sm text-blue-950" for="year">Year</label>
-                                <input value="{{ old('year') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('year') border-red-500 @enderror" type="number" name="year" id="year">
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('year') {{ $message }} @enderror</p>
+                                <select value="{{ old('year') }}" class="bg-[#ADE3FE] border-black border rounded-lg p-2 @error('year') border-red-500 @enderror" type="number" name="year" id="year">
+                                    <option value="1">1st</option>
+                                    <option value="2">2nd</option>
+                                    <option value="3">3rd</option>
+                                    <option value="4">4th</option>
+                                </select>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('year') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-sm text-blue-950" for="section">Section</label>
                                 <input value="{{ old('section') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('section') border-red-500 @enderror" type="text" name="section" id="section">
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('section') {{ $message }} @enderror</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('section') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex-1 text-gray-400"></div>
