@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('should_texts', function (Blueprint $table) {
+        Schema::create('active_sms', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('student_info_id')
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('should_texts');
+        Schema::dropIfExists('active_sms');
     }
 };

@@ -24,9 +24,11 @@ class StudentInfo extends Model
         'address',
     ];
 
-    public function guardian()
+    public function activatedSms(): bool
     {
-        return $this->hasOne(ShouldText::class, 'student_info_id');
+        return ActiveSms::query()
+            ->where('student_info_id', '=', $this->id)
+            ->exists();
     }
 
     public function gateLogs()
@@ -34,10 +36,14 @@ class StudentInfo extends Model
         return $this->hasMany(GateLog::class, 'student_info_id');
     }
 
-    public function latestLog() {
+    public function latestLog()
+    {
         return $this->hasOne(GateLog::class, 'student_info_id')->latestOfMany();
     }
 
+    public function fullPhoneNumber() {
+        return '63' . substr($this->phone_number, 1);
+    }
 
     public function gateLogsByDay()
     {
