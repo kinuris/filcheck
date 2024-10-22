@@ -91,6 +91,13 @@
             student
         } = await response.json();
 
+        fetch('/student/guardian/notify/' + student.id, { 
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+        });
+
         if (state === 'IN') {
             status.innerText = `RFID: ${rfid} - Entered Campus at ${new Date().toLocaleString()}`;
             status.style.color = 'green';
