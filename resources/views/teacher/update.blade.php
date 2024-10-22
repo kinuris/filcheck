@@ -15,6 +15,28 @@
                     @csrf
                     <div class="flex h-full">
                         <div class="flex-[2] p-3">
+                            <div class="aspect-square rounded-lg max-w-24 mx-auto mb-2 scale-x-[-1] overflow-hidden shadow bg-black" id="vid-container">
+                                <video class="object-cover h-full" id="video" autoplay></video>
+                            </div>
+
+                            <div class="hidden aspect-square rounded-lg overflow-hidden shadow bg-black" id="canvas-container">
+                                <canvas id="canvas"></canvas>
+                            </div>
+
+                            <div class="flex relative justify-center place-items-center aspect-square border-2 border-dashed border-slate-400 rounded-lg mb-5 bg-gray-50">
+                                <img src="{{ $teacher->image() }}" class="object-cover aspect-square rounded-lg" name="profile" alt="Profile Preview" id="preview">
+                                <p id="profile-tag" class="hidden">Profile Picture</p>
+                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('profile') {{ $message }} @enderror</p>
+                            </div>
+
+                            <div class="flex mt-2">
+                                <label class="text-white cursor-pointer bg-blue-800 p-3 rounded-lg font-bold" for="profile">UPLOAD</label>
+                                <input class="sr-only" type="file" name="profile" id="profile" accept="image/png,image/jpg,image/jpeg">
+                                <button class="bg-gray-400 text-white font-bold p-3 rounded-lg cursor-pointer ml-2" id="snap" type="button">SNAP</button>
+                            </div>
+                        </div>
+
+                        <!-- <div class="flex-[2] p-3">
                             <div class="flex justify-center place-items-center aspect-square border-2 border-dashed border-slate-400 rounded-lg mb-5 bg-gray-50">
                                 <img src="{{ $teacher->image() }}" class="rounded-lg object-cover aspect-square" alt="Profile Preview" id="preview">
                                 <p class="hidden" id="profile-tag">Profile Picture</p>
@@ -24,7 +46,8 @@
                                 <label class="text-white cursor-pointer bg-blue-800 p-3 rounded-lg font-bold" for="profile">UPLOAD</label>
                                 <input class="sr-only" type="file" name="profile" id="profile" accept="image/png,image/jpg,image/jpeg">
                             </div>
-                        </div>
+                        </div> -->
+
                         <div class="flex-[3] border-l border-gray-400">
                             <h1 class="text-center mt-3 text-blue-950 text-xl font-semibold mb-4">BASIC INFO</h1>
                             <div class="flex justify-between place-items-center px-3">
@@ -96,6 +119,76 @@
 
 @section('script')
 <script>
+    const canvas = document.getElementById('canvas');
+    const video = document.getElementById('video');
+    const profile = document.getElementById('profile');
+    const preview = document.getElementById('preview');
+    const tag = document.getElementById('profile-tag');
+    const snapBtn = document.getElementById('snap');
+
+    snapBtn.addEventListener('click', async () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext('2d');
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, -canvas.width, canvas.height);
+
+        const dataUrl = canvas.toDataURL('image/png');
+        preview.src = dataUrl;
+
+        preview.classList.remove('hidden');
+        tag.classList.add('hidden');
+
+        const response = await fetch(dataUrl);
+        const data = await response.blob();
+
+        const file = new File([data], 'profile.png', {
+            type: 'image/png'
+        });
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+
+        profile.files = dataTransfer.files;
+    });
+
+    profile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            tag.classList.add('hidden');
+            preview.classList.remove('hidden');
+
+            preview.src = reader.result;
+        }
+    });
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({
+                video: true
+            })
+            .then(function(stream) {
+                const video = document.getElementById('video');
+
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function(error) {
+                console.error("Error accessing the camera: ", error);
+            });
+    } else {
+        console.error("getUserMedia API not supported by this browser.");
+    }
+</script>
+<!-- <script>
     const profile = document.getElementById('profile');
     const preview = document.getElementById('preview');
     const tag = document.getElementById('profile-tag');
@@ -117,5 +210,5 @@
             preview.src = reader.result;
         }
     });
-</script>
+</script> -->
 @endsection
