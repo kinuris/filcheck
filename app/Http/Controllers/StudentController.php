@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActiveSms;
 use App\Models\GateLog;
 use App\Models\StudentInfo;
 use App\Models\User;
+use App\Helpers\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -27,7 +29,9 @@ class StudentController extends Controller
 
     public function log(string $rfid)
     {
-        $student = StudentInfo::where('rfid', '=', $rfid)->first();
+        $student = StudentInfo::query()
+            ->where('rfid', '=', $rfid)
+            ->first();
 
         if (!$student) {
             return response('Not found', 404);
@@ -104,7 +108,11 @@ class StudentController extends Controller
             'guardian' => ['required'],
             'address' => ['required'],
             'profile' => ['required', 'image', 'mimes:jpeg,png,jpg'],
+            'year' => ['required'],
+            'section' => ['required'],
         ]);
+
+        // TODO: add year and section
 
         $image = $request->file('profile');
         $filename = sha1(time()) . '.' . $image->extension();
@@ -114,7 +122,14 @@ class StudentController extends Controller
         $validated['profile_picture'] = $filename;
         $validated['department_id'] = $validated['department'];
 
-        StudentInfo::query()->create($validated);
+        $student = StudentInfo::query()->create($validated);
+
+        if ($request->has('sms_activated')) {
+            ActiveSms::query()
+                ->create([
+                    'student_info_id' => $student->id,
+                ]);
+        }
 
         return redirect('/student')->with('message', 'Student created successfully');
     }
@@ -154,9 +169,22 @@ class StudentController extends Controller
             'guardian' => ['required'],
             'address' => ['required'],
             'profile' => ['nullable', 'image', 'mimes:jpeg,png,jpg'],
+            'year' => ['required'],
+            'section' => ['required'],
         ]);
 
         $validated['department_id'] = $validated['department'];
+
+        if ($request->has('sms_activated')) {
+            ActiveSms::query()
+                ->create([
+                    'student_info_id' => $student->id,
+                ]);
+        } else {
+            ActiveSms::query()
+                ->where('student_info_id', '=', $student->id)
+                ->delete();
+        }
 
         if ($request->hasFile('profile')) {
             $image = $request->file('profile');
@@ -171,6 +199,30 @@ class StudentController extends Controller
         $student->update($validated);
 
         return redirect('/student')->with('message', 'Student updated successfully');
+    }
+
+    public function smsNotifyGuardian(StudentInfo $student)
+    {
+        $latest = $student->latestLog;
+
+        if ($latest === null) {
+            return abort(404);
+        }
+
+        if (!$student->activatedSms()) {
+            return response('Not Activated SMS', 200);
+        }
+
+        $msg = Message::filcheck();
+
+        if ($latest->type === 'OUT') {
+            $msg->setMessage('FILCHECK: Hey there ' . $student->guardian . ', ' . $student->full_name . ' has LEFT⬅️ the school this ' . date_create($latest->day)->format('jS \o\f F, Y,') . ' ' . date_create($latest->time)->format('g:i A') . '.');
+        } else {
+            $msg->setMessage('FILCHECK: Hey there ' . $student->guardian . ', ' . $student->full_name . ' has ENTERED✅ the school this ' . date_create($latest->day)->format('jS \o\f F, Y,') . ' ' . date_create($latest->time)->format('g:i A') . '.');
+        }
+
+        $msg->setFullPhoneNumber($student->fullPhoneNumber());
+        $msg->send();
     }
 
     /**
