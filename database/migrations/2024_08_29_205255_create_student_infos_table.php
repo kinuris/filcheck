@@ -29,6 +29,9 @@ return new class extends Migration
             $table->date('birthdate');
             $table->string('profile_picture');
 
+            $table->integer('year');
+            $table->string('section');
+
             $table->foreignId('department_id')
                 ->references('id')
                 ->on('departments');

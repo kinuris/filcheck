@@ -1,7 +1,8 @@
-@extends('layouts.teacher')
+@extends(Auth::user()->role === 'Teacher' ? 'layouts.teacher' : 'layouts.admin')
 
 @section('content')
-<div class="w-full">
+<div class="w-full relative">
+    @include('includes.receiver-notifier')
     <div class="w-full inline-block h-full bg-white">
         <div class="h-16 p-4">
             <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
@@ -126,18 +127,18 @@
                             <h1 class="text-center text-blue-950 text-xl font-semibold">LEVEL & SECTION</h1>
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-sm text-blue-950" for="year">Year</label>
-                                <select value="{{ old('year') }}" class="bg-[#ADE3FE] border-black border rounded-lg p-2 @error('year') border-red-500 @enderror" type="number" name="year" id="year">
-                                    <option value="1">1st</option>
-                                    <option value="2">2nd</option>
-                                    <option value="3">3rd</option>
-                                    <option value="4">4th</option>
+                                <select class="bg-[#ADE3FE] border-black border rounded-lg p-2 @error('year') border-red-500 @enderror" type="number" name="year" id="year">
+                                    <option {{ $student->year == 1 ? 'selected' : '' }} value="1">1st</option>
+                                    <option {{ $student->year == 2 ? 'selected' : '' }} value="2">2nd</option>
+                                    <option {{ $student->year == 3 ? 'selected' : '' }} value="3">3rd</option>
+                                    <option {{ $student->year == 4 ? 'selected' : '' }} value="4">4th</option>
                                 </select>
                                 <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('year') {{ $message }} @enderror</p>
                             </div>
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-sm text-blue-950" for="section">Section</label>
-                                <input value="{{ old('section') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('section') border-red-500 @enderror" type="text" name="section" id="section">
+                                <input placeholder="Ex. BSCS-3A" value="{{ $student->section }}" class="bg-[#ADE3FE] uppercase border-black border rounded-lg px-2 py-1 @error('section') border-red-500 @enderror" type="text" name="section" id="section">
                                 <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('section') {{ $message }} @enderror</p>
                             </div>
 
@@ -157,6 +158,19 @@
 @endsection
 
 @section('script')
+@include('includes.receiver-script')
+<script>
+    const section = document.getElementById('section');
+
+    section.addEventListener('keydown', (event) => {
+        if (event.key === ' ') {
+            event.preventDefault();
+            return false;
+        }
+
+        return true;
+    })
+</script>
 <script>
     const canvas = document.getElementById('canvas');
     const video = document.getElementById('video');

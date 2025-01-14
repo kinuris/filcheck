@@ -7,7 +7,9 @@ use App\Models\GateLog;
 use App\Models\StudentInfo;
 use App\Models\User;
 use App\Helpers\Message;
+use App\Models\EmployeeLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -15,16 +17,44 @@ class StudentController extends Controller
 {
     public function get(string $rfid)
     {
-        $student = StudentInfo::where('rfid', '=', $rfid)->first();
+        $student = StudentInfo::query()
+            ->where('rfid', '=', $rfid)
+            ->first();
 
-        if (!$student) {
+        $teacher = User::query()
+            ->where('rfid', '=', $rfid)
+            ->first();
+
+        if (!$student && !$teacher) {
             return response('Not found', 404);
         }
 
-        $data = $student->toArray();
-        $data = array_merge($data, ['department' => $student->department, 'image' => $student->image()]);
+        if ($student && $teacher) {
+            return response('Multiple found', 404);
+        }
 
-        return response()->json(['student' => $data]);
+        if ($student) {
+            $data = $student->toArray();
+            $data = array_merge($data, [
+                'department' => $student->department,
+                'year_sec' => 'Year Level ' . $student->year . ' & SectionU ' . $student->section,
+                'image' => $student->image(),
+            ]);
+
+            return response()->json(['student' => $data]);
+        }
+
+        if ($teacher) {
+            $data = $teacher->toArray();
+            $data = array_merge($data, [
+                'department' => $teacher->department,
+                'image' => $teacher->image(),
+                'year_sec' => 'TEACHER',
+                'student_number' => 'TEACHER',
+            ]);
+
+            return response()->json(['student' => $data]);
+        }
     }
 
     public function log(string $rfid)
@@ -33,27 +63,60 @@ class StudentController extends Controller
             ->where('rfid', '=', $rfid)
             ->first();
 
-        if (!$student) {
+        $teacher = User::query()
+            ->where('role', '=', 'Teacher')
+            ->where('rfid', '=', $rfid)
+            ->first();
+
+        if (!$student && !$teacher) {
             return response('Not found', 404);
         }
 
-        $log = $student->gateLogs()->orderBy('created_at', 'DESC')->first();
-        if ($log && !$log->isSameDay(date_create('now'))) {
-            $state = 'IN';
-        } else if ($log && $log->isSameDay(date_create('now'))) {
-            $log->type === 'IN' ? $state = 'OUT' : $state = 'IN';
-        } else if (is_null($log)) {
-            $state = 'IN';
+        if ($student) {
+            $log = $student->gateLogs()
+                ->latest()
+                ->first();
+
+            if ($log && !$log->isSameDay(date_create('now'))) {
+                $state = 'IN';
+            } else if ($log && $log->isSameDay(date_create('now'))) {
+                $log->type === 'IN' ? $state = 'OUT' : $state = 'IN';
+            } else if (is_null($log)) {
+                $state = 'IN';
+            }
+
+            GateLog::query()->create([
+                'student_info_id' => $student->id,
+                'type' => $state,
+                'day' => date_create('now')->format('Y-m-d'),
+                'time' => date_create('now')->format('H:i:s'),
+            ]);
+
+            return response()->json(['state' => $state]);
         }
 
-        GateLog::query()->create([
-            'student_info_id' => $student->id,
-            'type' => $state,
-            'day' => date_create('now')->format('Y-m-d'),
-            'time' => date_create('now')->format('H:i:s'),
-        ]);
+        if ($teacher) {
+            $log = $teacher->gateLogs()
+                ->latest()
+                ->first();
 
-        return response()->json(['state' => $state]);
+            if ($log && !$log->isSameDay(date_create('now'))) {
+                $state = 'IN';
+            } else if ($log && $log->isSameDay(date_create('now'))) {
+                $log->type === 'IN' ? $state = 'OUT' : $state = 'IN';
+            } else if (is_null($log)) {
+                $state = 'IN';
+            }
+
+            EmployeeLog::query()->create([
+                'type' => $state,
+                'day' => date_create('now')->format('Y-m-d'),
+                'time' => date_create('now')->format('H:i:s'),
+                'user_id' => $teacher->id,
+            ]);
+
+            return response()->json(['state' => $state]);
+        }
     }
 
     public function studentView()
@@ -67,6 +130,13 @@ class StudentController extends Controller
     public function index()
     {
         $students = StudentInfo::query();
+        $advisedSections = User::query()->find(Auth::user()->id)->advisedSections;
+
+        $students = $students->whereIn('section', $advisedSections->pluck('section'));
+
+        if (Auth::user()->role === 'Admin') {
+            $students = StudentInfo::query();
+        }
 
         $search = request('search');
         if ($search) {
@@ -121,6 +191,8 @@ class StudentController extends Controller
 
         $validated['profile_picture'] = $filename;
         $validated['department_id'] = $validated['department'];
+        $validated['section'] = strtoupper($validated['section']);
+        $validated['year'] = (int) $validated['year'][0];
 
         $student = StudentInfo::query()->create($validated);
 
@@ -174,6 +246,8 @@ class StudentController extends Controller
         ]);
 
         $validated['department_id'] = $validated['department'];
+        $validated['section'] = strtoupper($validated['section']);
+        $validated['year'] = (int) $validated['year'][0];
 
         if ($request->has('sms_activated')) {
             ActiveSms::query()

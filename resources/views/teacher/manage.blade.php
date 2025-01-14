@@ -52,7 +52,7 @@
                         @endif
 
                         <td class="border-r">{{ $teacher->phone_number }}</td>
-                        <td class="border-r">{{ $teacher->getDepartment()->code }}</td>
+                        <td class="border-r">{{ $teacher->department->code }}</td>
                         <td class="flex justify-center">
                             <div class="flex">
                                 <a class="flex flex-col justify-center my-1 transition-transform hover:scale-110 text-md rounded border border-black px-2 py-1 bg-blue-200" href="/teacher/edit/{{ $teacher->id }}">

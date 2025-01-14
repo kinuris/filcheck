@@ -45,6 +45,28 @@
                     </div>
                 </a>
 
+                <a href="/event/view" class="font-extrabold hover:text-gray-300">
+                    <div class="p-3 hover:bg-blue-300 hover:shadow-lg rounded-lg mb-1 flex">
+                        <span class="material-symbols-outlined me-3">
+                            prescriptions
+                        </span>
+                        <li>
+                            Events
+                        </li>
+                    </div>
+                </a>
+
+                <a href="/attendance/class" class="font-extrabold hover:text-gray-300">
+                    <div class="p-3 hover:bg-blue-300 hover:shadow-lg rounded-lg mb-1 flex">
+                        <span class="material-symbols-outlined me-3">
+                            class
+                        </span>
+                        <li>
+                            Class Attendance
+                        </li>
+                    </div>
+                </a>
+
                 <a href="/attendance" class="font-extrabold hover:text-gray-300">
                     <div class="p-3 hover:bg-blue-300 hover:shadow-lg rounded-lg mb-1 flex">
                         <span class="material-symbols-outlined me-3">

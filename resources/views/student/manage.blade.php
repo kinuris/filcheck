@@ -1,4 +1,5 @@
-@extends('layouts.teacher')
+
+@extends(Auth::user()->role === 'Teacher' ? 'layouts.teacher' : 'layouts.admin')
 
 @section('content')
 <div class="w-full">
@@ -14,9 +15,11 @@
                 </form>
             </div>
 
+            @if (Auth::user()->role === 'Admin')
             <a class="max-w-fit mb-5 mt-2 transition-transform hover:scale-110 shadow-lg text-md rounded border border-black p-2 bg-blue-200" href="/student/create">CREATE NEW STUDENT</a>
+            @endif
 
-            <table class="w-full shadow-lg">
+            <table class="w-full shadow-lg mt-4">
                 <thead class="bg-blue-500 text-blue-950">
                     <th class="rounded-tl-lg p-2">#</th>
                     <th>STUDENT NO.</th>
@@ -26,8 +29,15 @@
                     <th>PARENT or<br>GUARDIAN</th>
                     <th>PHONE #</th>
                     <th>ADDRESS</th>
+                    @if (Auth::user()->role === 'Admin')
                     <th>RFID</th>
+                    @else
+                    <th class="rounded-tr-lg">RFID</th>
+                    @endif
+
+                    @if (Auth::user()->role === 'Admin')
                     <td class="rounded-tr-lg w-6"></td>
+                    @endif
                 </thead>
                 <tbody class="bg-blue-300 border-t text-center">
                     @if(empty($students->items()))
@@ -40,7 +50,9 @@
                         <td></td>
                         <td></td>
                         <td></td>
+                        @if (Auth::user()->role === 'Admin')
                         <td></td>
+                        @endif
                         <td class="rounded-br-lg p-2"></td>
                     </tr>
                     @endif
@@ -63,7 +75,12 @@
                         <td class="border-r">{{ $student->guardian }}</td>
                         <td class="border-r">{{ $student->phone_number }}</td>
                         <td class="border-r">{{ $student->address }}</td>
+                        @if (Auth::user()->role === 'Teacher')
+                        <td class="rounded-br-lg">{{ $student->rfid }}</td>
+                        @else
                         <td class="border-r">{{ $student->rfid }}</td>
+                        @endif
+                        @if (Auth::user()->role === 'Admin')
                         <td class="flex justify-center px-2">
                             <div class="flex">
                                 <a class="flex flex-col justify-center my-1 transition-transform hover:scale-110 text-md rounded border border-black px-2 py-1 bg-blue-200" href="/student/edit/{{ $student->id }}">
@@ -79,6 +96,7 @@
                                 </a>
                             </div>
                         </td>
+                        @endif
                     </tr>
                     @endforeach
                 </tbody>

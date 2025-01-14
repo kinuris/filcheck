@@ -4,6 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Include base CSS (optional) -->
+    <!-- <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/base.min.css" /> -->
+
+    <!-- Include Choices CSS -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
     @vite('resources/css/app.css')
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <title>@yield('title')</title>
@@ -33,7 +44,7 @@
                     </div>
                 </a>
 
-                <!-- <a href="#" class="font-extrabold hover:text-gray-300">
+                <a href="/student" class="font-extrabold hover:text-gray-300">
                     <div class="p-3 hover:bg-blue-300 hover:shadow-lg rounded-lg mb-1 flex">
                         <span class="material-symbols-outlined me-3">
                             groups
@@ -42,15 +53,48 @@
                             Manage Students
                         </li>
                     </div>
-                </a> -->
+                </a>
+
+                <a href="/curriculum" class="font-extrabold hover:text-gray-300">
+                    <div class="p-3 hover:bg-blue-300 hover:shadow-lg rounded-lg mb-1 flex">
+                        <span class="material-symbols-outlined me-3">
+                            menu_book
+                        </span>
+                        <li>
+                            Manage Curriculum
+                        </li>
+                    </div>
+                </a>
 
                 <a href="/teacher" class="font-extrabold hover:text-gray-300">
+                    <div class="p-3 hover:bg-blue-300 hover:shadow-lg rounded-lg mb-1 flex">
+                        <span class="material-symbols-outlined me-3">
+                            person
+                        </span>
+                        <li>
+                            Manage Teachers
+                        </li>
+                    </div>
+                </a>
+
+                <a href="/employee" class="font-extrabold hover:text-gray-300">
+                    <div class="p-3 hover:bg-blue-300 hover:shadow-lg rounded-lg mb-1 flex">
+                        <span class="material-symbols-outlined me-3">
+                            badge
+                        </span>
+                        <li>
+                            Employee Attendance
+                        </li>
+                    </div>
+                </a>
+
+                <a href="/event" class="font-extrabold hover:text-gray-300">
                     <div class="p-3 hover:bg-blue-300 hover:shadow-lg rounded-lg mb-1 flex">
                         <span class="material-symbols-outlined me-3">
                             prescriptions
                         </span>
                         <li>
-                            Manage Teachers
+                            Events
                         </li>
                     </div>
                 </a>
@@ -72,6 +116,9 @@
         </div>
         @yield('content')
     </div>
+
+    <!-- Include Choices JavaScript (latest) -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     @yield('script')
 </body>

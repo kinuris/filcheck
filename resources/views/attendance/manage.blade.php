@@ -58,8 +58,8 @@
                         @endif
                         <td class="border-r">{{ $info->student_number }}</td>
                         <td class="border-r">{{ $info->full_name }}</td>
-                        <td class="border-r">Hello</td>
-                        <td class="border-r">World</td>
+                        <td class="border-r">{{ $info->year }}</td>
+                        <td class="border-r">{{ $info->section }}</td>
                         @php($recent = $info->gateLogs()->orderBy('day', 'DESC')->orderBy('time', 'DESC')->first())
                         @if ($recent)
                         <td class="border-r">{{ $recent->day }}</td>

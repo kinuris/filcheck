@@ -9,6 +9,30 @@
 </head>
 
 <body>
+    <div id="setupClassNodeModal" class="hidden fixed z-10 inset-0 overflow-y-auto bg-black bg-opacity-80">
+        <div class="flex items-center justify-center min-h-screen w-full">
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                <div class="flex justify-between items-center pb-3">
+                    <h2 class="text-xl font-semibold">Setup Class Node</h2>
+                    <button id="closeModal" class="text-black">&times;</button>
+                </div>
+                <form action="{{ route('class-node.setup') }}" method="POST">
+                    @csrf
+                    <div class="mb-4">
+                        <label for="roomName" class="block text-sm font-medium text-gray-700">Room Name</label>
+                        <input type="text" name="room_name" id="roomName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        @error('room_name')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <form action="/login" method="POST">
         @csrf
         <div class="inline-block w-screen h-screen">
@@ -32,13 +56,29 @@
                             Login
                         </button>
 
-                        <a class="underline mt-3 font-bold" href="/rfid">ATTENDANCE MONITOR</a>
+                        <a class="underline mt-5 font-bold" href="/rfid">ATTENDANCE MONITOR</a>
+                        <button type="button" onclick="openModal()" class="underline mt-1 font-bold">SETUP CLASS NODE</button>
                     </div>
                 </div>
                 <img class="top-0 absolute -z-[1] h-full" src="{{ asset('assets/bg.png') }}" alt="Background">
             </div>
         </div>
     </form>
+    <script>
+        function openModal() {
+            document.getElementById('setupClassNodeModal').classList.remove('hidden');
+            document.getElementById('setupClassNodeModal').classList.add('flex');
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.getElementById('setupClassNodeModal').classList.add('hidden');
+                document.getElementById('setupClassNodeModal').classList.remove('flex');
+            });
+
+        }
+
+        <?php if (session('openModal') === 1): ?>
+            openModal();
+        <?php endif ?>
+    </script>
 </body>
 
 </html>

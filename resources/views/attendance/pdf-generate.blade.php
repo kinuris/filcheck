@@ -1,7 +1,7 @@
 @extends('layouts.teacher')
 
 @section('content')
-<div class="w-full p-3">
+<div class="w-full p-3 max-h-screen overflow-auto">
     <h1 class="text-2xl">PDF FILE ATTENDANCE RECORD</h1>
     <div class="my-1"></div>
     <div class="flex gap-2">
@@ -28,7 +28,7 @@
                 <th class="py-2 px-4 border-b-2 border-gray-300">Action</th>
             </thead>
             <tbody>
-                @foreach ($info->gateLogs as $log)
+                @foreach ($info->gateLogs()->orderBy('day', 'DESC')->orderBy('time', 'DESC')->get() as $log)
                 <tr>
                     <td class="py-2 px-4 border-b border-gray-300">{{ $log->day }}</td>
                     <td class="py-2 px-4 border-b border-gray-300">{{ date_create($log->time)->format('g:i:s A') }}</td>

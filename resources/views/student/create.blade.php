@@ -1,7 +1,8 @@
-@extends('layouts.teacher')
+@extends(Auth::user()->role === 'Teacher' ? 'layouts.teacher' : 'layouts.admin')
 
 @section('content')
-<div class="w-full">
+<div class="w-full relative">
+    @include('includes.receiver-notifier')
     <div class="w-full inline-block h-full bg-white">
         <div class="h-16 p-4">
             <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
@@ -41,7 +42,7 @@
 
                             <div class="flex flex-col px-3 relative">
                                 <label class="font-semibold text-lg text-blue-950" for="rfid">RFID TAG</label>
-                                <input value="{{ old('rfid') }}" class="bg-[#c3e8f8] border-black border rounded-lg px-2 py-1" type="text" name="rfid" id="rfid" readonly>
+                                <input value="{{ old('rfid') }}" class="bg-[#c3e8f8] border-black border rounded-lg px-2 py-1" type="text" name="rfid" id="rfid">
                                 <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('rfid') {{ $message }} @enderror</p>
                             </div>
 
@@ -137,7 +138,7 @@
 
                             <div class="flex flex-col px-3 mt-2 relative">
                                 <label class="font-semibold text-sm text-blue-950" for="section">Section</label>
-                                <input value="{{ old('section') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('section') border-red-500 @enderror" type="text" name="section" id="section">
+                                <input value="{{ old('section') }}" class="bg-[#ADE3FE] uppercase border-black border rounded-lg px-2 py-1 @error('section') border-red-500 @enderror" type="text" name="section" id="section">
                                 <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('section') {{ $message }} @enderror</p>
                             </div>
 
@@ -157,6 +158,7 @@
 @endsection
 
 @section('script')
+@include('includes.receiver-script')
 <script>
     const canvas = document.getElementById('canvas');
     const video = document.getElementById('video');

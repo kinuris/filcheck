@@ -2,14 +2,90 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RoomSchedule;
+use App\Models\ScheduleAttendanceRecord;
 use App\Models\StudentInfo;
+use App\Models\User;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
+    public function log(string $rfid, RoomSchedule $sched)
+    {
+        $student = StudentInfo::query()
+            ->where('rfid', '=', $rfid)
+            ->first();
+
+        if ($student == null || $student->section !== $sched->section) {
+            return response()->json([
+                'status' => 'ssnf',
+                'message' => 'Student not found or not in the same section as the schedule.',
+            ]);
+        }
+
+        $latestLog = ScheduleAttendanceRecord::query()
+            ->where('student_info_id', '=', $student->id)
+            ->where('room_schedule_id', '=', $sched->id)
+            ->latest()
+            ->first();
+
+        if ($latestLog != null && $latestLog->type === 'IN') {
+            $log = ScheduleAttendanceRecord::create([
+                'student_info_id' => $student->id,
+                'room_schedule_id' => $sched->id,
+                'day' => date_create()->format('Y-m-d'),
+                'time' => date_create()->format('H:i:s'),
+                'type' => 'OUT',
+            ]);
+
+            $data = [
+                'profile' => $student->image(),
+                'fullname' => $student->fullname,
+                'section' => $student->section,
+                'year' => $student->year,
+                'date' => $log->day,
+                'time' => date_create($log->time)->format('h:i A'),
+            ];
+
+            return response()->json([
+                'status' => 'success',
+                'message' => $student->fullname .  ' exited at ' . $log->created_at,
+                'student' => json_encode($data),
+            ]);
+        }
+
+        $log = ScheduleAttendanceRecord::create([
+            'student_info_id' => $student->id,
+            'room_schedule_id' => $sched->id,
+            'day' => date_create()->format('Y-m-d'),
+            'time' => date_create()->format('H:i:s'),
+            'type' => 'IN',
+        ]);
+
+        $data = [
+            'profile' => $student->image(),
+            'fullname' => $student->fullname,
+            'section' => $student->section,
+            'year' => $student->year,
+            'date' => $log->day,
+            'time' => date_create($log->time)->format('h:i A'),
+        ];
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $student->fullname . ' entered at ' . $log->created_at,
+            'student' => json_encode($data),
+        ]);
+    }
+
     public function index()
     {
         $infos = StudentInfo::query();
+        $advisedSections = User::query()->find(Auth::user()->id)->advisedSections;
+
+        $infos = $infos->whereIn('section', $advisedSections->pluck('section'));
 
         $search = request('search');
         if ($search) {
@@ -41,14 +117,14 @@ class AttendanceController extends Controller
             }
         };
 
-        $fileName = $info->last_name . '_attendance_logs.csv';
+        $fileName = $info->last_name . '_' . date_create()->format('Y_m_d') . '_att_logs' . '.csv';
         $headers = [
             "Content-type" => "text/csv",
             "Content-Disposition" => "attachment; filename=$fileName",
             "Pragma" => "no-cache",
             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
             "Expires" => "0"
-        ]; 
+        ];
 
         return response()->stream($cb, 200, $headers);
     }

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'first_name',
         'middle_name',
         'last_name',
+        'rfid',
         'profile_picture',
         'role',
         'gender',
@@ -31,14 +32,38 @@ class User extends Authenticatable
         'password',
     ];
 
-    public function getDepartment()
+    public function gateLogs()
     {
-        return Department::query()->find($this->department_id);
+        return $this->hasMany(EmployeeLog::class, 'user_id');
+    }
+
+    public function classes() {
+        return $this->hasMany(RoomSchedule::class, 'user_id');
+    }
+
+    public function advisories()
+    {
+        return $this->hasMany(SectionAdvisory::class, 'user_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'id');
     }
 
     public static function teachers()
     {
         return self::query()->where('role', '=', 'Teacher');
+    }
+
+    public function advisedSections()
+    {
+        return $this->hasMany(SectionAdvisory::class, 'user_id');
+    }
+
+    public function latestLog()
+    {
+        return $this->hasOne(EmployeeLog::class, 'user_id')->latestOfMany();
     }
 
     public function image()

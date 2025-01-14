@@ -67,7 +67,12 @@
 
         const [response, logResponse] = await Promise.all([
             fetch('/student/get/' + rfid),
-            fetch('/student/log/' + rfid),
+            fetch('/student/log/' + rfid, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                }
+            }),
         ]);
 
         if (response.status !== 200) {
@@ -91,12 +96,12 @@
             student
         } = await response.json();
 
-        fetch('/student/guardian/notify/' + student.id, { 
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-        });
+        // fetch('/student/guardian/notify/' + student.id, { 
+        //     method: 'POST',
+        //     headers: {
+        //         'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        //     },
+        // });
 
         if (state === 'IN') {
             status.innerText = `RFID: ${rfid} - Entered Campus at ${new Date().toLocaleString()}`;
@@ -110,6 +115,7 @@
         profile.src = student.image;
         name.value = `${student.first_name}${student.middle_name ? ` ${student.middle_name[0]}.` : ' '} ${student.last_name}`;
         department.value = student.department.name;
+        sect.value = student.year_sec
     });
 </script>
 @endsection

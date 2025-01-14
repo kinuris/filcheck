@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('middle_name')->nullable();
             $table->string('last_name');
+
+            $table->string('rfid')->unique();
+
             $table->string('profile_picture')->nullable();
             $table->enum('role', ['Admin', 'Teacher']);
             $table->enum('gender', ['Male', 'Female']);

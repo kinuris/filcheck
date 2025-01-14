@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SectionAdvisory;
+use App\Models\StudentInfo;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -52,6 +54,7 @@ class TeacherController extends Controller
             'last_name' => ['required'],
             'phone_number' => ['required', 'unique:users'],
             'gender' => ['required'],
+            'rfid' => ['required', 'unique:users'],
             'birthdate' => ['required', 'date'],
             'username' => ['required', 'unique:users'],
             'password' => ['required'],
@@ -90,7 +93,12 @@ class TeacherController extends Controller
      */
     public function edit(User $teacher)
     {
-        return view('teacher.update')->with('teacher', $teacher);
+        $sections = StudentInfo::query()
+            ->distinct('section')
+            ->pluck('section');
+
+        return view('teacher.update')->with('teacher', $teacher)
+            ->with('sections', $sections);
     }
 
     /**
@@ -107,8 +115,17 @@ class TeacherController extends Controller
             'birthdate' => ['required', 'date'],
             'username' => ['required', Rule::unique('users')->ignore($teacher->id)],
             'department' => ['required'],
-            'profile' => ['nullable', 'image', 'mimes:jpg,png,jpeg']
+            'profile' => ['nullable', 'image', 'mimes:jpg,png,jpeg'],
+            'advisories' => ['nullable', 'array'],
         ]);
+
+        SectionAdvisory::query()->where('user_id', $teacher->id)->delete();
+        foreach ($validated['advisories'] ?? [] as $advisory) {
+            SectionAdvisory::query()->create([
+                'user_id' => $teacher->id,
+                'section' => $advisory
+            ]);
+        }
 
         $validated['department_id'] = $validated['department'];
         if ($request->hasFile('profile')) {

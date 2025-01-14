@@ -1,7 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="w-full">
+<div class="w-full relative">
+    @include('includes.receiver-notifier')
     <div class="w-full inline-block h-full bg-white">
         <div class="h-16 p-4">
             <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
@@ -39,6 +40,16 @@
                         <div class="flex-[3] border-l border-gray-400">
                             <h1 class="text-center mt-3 text-blue-950 text-xl font-semibold mb-4">BASIC INFO</h1>
                             <div class="flex justify-between place-items-center px-3">
+                                <label class="font-semibold text-lg text-blue-950" for="rfid">RFID</label>
+                                <input value="{{ old('rfid') }}" class="bg-[#c3e8f8] border-black border rounded-lg px-2 py-1" type="text" name="rfid" id="rfid" readonly>
+                            </div>
+
+                            <div class="flex justify-between place-items-center px-3 mt-2">
+                                <label class="font-semibold text-lg text-blue-950" for="employee_id">EMPLOYEE ID</label>
+                                <input value="{{ old('employee_id') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1" type="text" name="employee_id" id="employee_id">
+                            </div>
+
+                            <div class="flex justify-between place-items-center px-3 mt-2">
                                 <label class="font-semibold text-lg text-blue-950" for="firstname">FIRST NAME</label>
                                 <input value="{{ old('first_name') }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1" type="text" name="first_name" id="firstname">
                             </div>
@@ -111,6 +122,7 @@
 @endsection
 
 @section('script')
+@include('includes.receiver-script')
 <script>
     const canvas = document.getElementById('canvas');
     const video = document.getElementById('video');
@@ -180,5 +192,13 @@
     } else {
         console.error("getUserMedia API not supported by this browser.");
     }
+</script>
+<script>
+    const stream = new EventSource('http://localhost:8081/stream/current?stream=current');
+    const rfidField = document.getElementById('rfid');
+
+    stream.addEventListener('message', (e) => {
+        rfidField.value = e.data;
+    });
 </script>
 @endsection

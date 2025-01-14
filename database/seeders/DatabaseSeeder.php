@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Department;
+use App\Models\StudentInfo;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -19,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => fake()->firstName(),
             'middle_name' => fake()->optional()->lastName(),
             'last_name' => fake()->lastName(),
+            'rfid' => str_pad(fake()->unique()->randomNumber(8), 10, '0'),
             'department_id' => Department::all()->random()->id,
             'profile_picture' => fake()->imageUrl(),
             'role' => 'Admin',
@@ -33,6 +35,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => fake()->firstName(),
             'middle_name' => fake()->optional()->lastName(),
             'last_name' => fake()->lastName(),
+            'rfid' => str_pad(fake()->unique()->randomNumber(8), 10, '0'),
             'department_id' => Department::all()->random()->id,
             'profile_picture' => fake()->imageUrl(),
             'role' => 'Teacher',
@@ -41,6 +44,23 @@ class DatabaseSeeder extends Seeder
             'phone_number' => fake()->phoneNumber(),
             'username' => 'teacher',
             'password' => bcrypt('password'),
+        ]);
+
+        StudentInfo::query()->create([
+            'rfid' => str_pad(fake()->unique()->randomNumber(8), 10, '0'),
+            'first_name' => fake()->firstName(),
+            'middle_name' => fake()->optional()->lastName(),
+            'last_name' => fake()->lastName(),
+            'gender' => 'Male', 
+            'student_number' => str_pad(fake()->unique()->randomNumber(8), 10, '0'),
+            'phone_number' => fake()->phoneNumber(),
+            'profile_picture' => fake()->imageUrl(),
+            'guardian' => fake()->name(),
+            'birthdate' => fake()->date(),
+            'department_id' => Department::all()->random()->id,
+            'address' => fake()->address(),
+            'year' => fake()->numberBetween(1, 4),
+            'section' => 'BSCS-4',
         ]);
     }
 }

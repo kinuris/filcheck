@@ -22,7 +22,36 @@ class StudentInfo extends Model
         'birthdate',
         'department_id',
         'address',
+        'year',
+        'section'
     ];
+
+    public static function getExistingSections(?int $year = null)
+    {
+        $unparsed = StudentInfo::query()
+            ->select('section');
+
+        if ($year != null) {
+            $unparsed = $unparsed->where('year', '=', $year);
+        }
+
+        $unparsed = $unparsed
+            ->distinct()
+            ->get();
+
+        $parsed = array();
+        foreach ($unparsed->toArray() as $section) {
+            array_push($parsed, $section['section']);
+        }
+
+        return $parsed;
+    }
+
+    public function attendanceRecordOf(Event $event)
+    {
+        return $this->hasMany(EventAttendanceRecord::class, 'student_info_id')
+            ->where('event_id', '=', $event->id);
+    }
 
     public function activatedSms(): bool
     {
@@ -30,6 +59,8 @@ class StudentInfo extends Model
             ->where('student_info_id', '=', $this->id)
             ->exists();
     }
+
+    
 
     public function gateLogs()
     {
@@ -41,7 +72,8 @@ class StudentInfo extends Model
         return $this->hasOne(GateLog::class, 'student_info_id')->latestOfMany();
     }
 
-    public function fullPhoneNumber() {
+    public function fullPhoneNumber()
+    {
         return '63' . substr($this->phone_number, 1);
     }
 
@@ -49,6 +81,7 @@ class StudentInfo extends Model
     {
         $logs = $this->gateLogs()
             ->orderBy('day', 'DESC')
+            ->orderBy('time', 'DESC')
             ->get();
 
         $result = [];
