@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Setup Schedule Modal -->
-<div id="setupScheduleModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+<div id="setupScheduleModal" class="hidden z-50 fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
     <div class="bg-white rounded-lg shadow-lg p-6 w-1/3 min-w-[500px]">
         <div class="flex justify-between items-center ">
             <h2 class="text-xl font-bold">Setup Schedule</h2>
@@ -110,139 +110,219 @@
     }
 </script>
 
-<div class="bg-gradient-to-b from-blue-500 to-blue-400 w-full">
-    <div class="w-full inline-block bg-white">
-        <div class="h-16 p-4">
-            <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
+<div class="min-h-screen max-h-[calc(100vh-4em)] bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 min-w-[calc(100vw-300px)] overflow-auto">
+    <!-- Header -->
+    <div class="w-full bg-white shadow-lg">
+        <div class="container mx-auto h-20 p-4 flex items-center">
+            <img src="{{ asset('assets/filcheck.svg') }}" alt="FilCheck Logo" class="h-12">
         </div>
     </div>
 
-    <div class="px-8 py-4">
-        <h1 class="text-2xl font-bold text-white stroke-black stroke-1">ACADEMIC PROGRAMS</h1>
+    <div class="container mx-auto px-8 py-6">
+        <!-- Title Section -->
+        <h1 class="text-4xl font-bold text-white mb-10 tracking-tight">Academic Programs Management</h1>
 
+        <!-- Rooms Management Section -->
         @php($rooms = App\Models\Room::all())
-        <div class="mt-4 flex items-center space-x-4">
-            <a href="{{ route('room.create') }}" class="bg-blue-300 font-bold py-2 px-4 text-center rounded shadow-lg flex items-center w-fit">
-                + Room <div class="mx-2"></div>
-                <span class="material-symbols-outlined me-3">
-                    door_front
-                </span>
-            </a>
-
-            <p class="text-white text-xs self-end">Total Rooms: {{ count($rooms) }}</p>
-        </div>
-
-        <div class="mt-4 overflow-x-auto">
-            <hr>
-            <div class="flex space-x-4 my-1.5">
-                @if (count($rooms) === 0)
-                <p class="text-white text-xl font-thin my-4">No Rooms (Add rooms)</p>
-                @endif
-                @foreach($rooms as $room)
-                <div data-room-name="{{ $room->name }}" data-room-id="{{ $room->id }}" class="bg-blue-300 border border-white rounded shadow px-4 py-3 w-64 cursor-move draggable" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '{{ $room->id }}')">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-bold">{{ $room->name }}</h2>
-                        <p class="text-sm text-gray-500">#{{ $room->id }}</p>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <p class="text-gray-600">{{ $room->building }}</p>
-                        <form action="{{ route('room.delete', ['room' => $room->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this room?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500">
-                                <span class="material-symbols-outlined w-4">
-                                    delete
-                                </span>
-                            </button>
-                        </form>
-                    </div>
+        <div class="bg-white/40 backdrop-blur-md rounded-xl p-8 mb-6 shadow-xl">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-2xl font-bold text-white">Room Management</h2>
+                    <span class="bg-white/20 px-4 py-1 rounded-full text-white text-sm">
+                        {{ count($rooms) }} Available
+                    </span>
                 </div>
-                @endforeach
+                <a href="{{ route('room.create') }}"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 flex items-center group">
+                    <span class="material-symbols-outlined mr-2 group-hover:scale-110 transition-transform">add_circle</span>
+                    New Room
+                </a>
             </div>
-            <hr>
+
+            <div class="overflow-x-auto">
+                <div class="flex space-x-6 py-4">
+                    @if (count($rooms) === 0)
+                    <div class="w-full text-center py-8">
+                        <span class="material-symbols-outlined text-white/50 text-4xl mb-2">inventory_2</span>
+                        <p class="text-white text-xl font-light">No Rooms Available</p>
+                    </div>
+                    @endif
+                    @foreach($rooms as $room)
+                    <div data-room-name="{{ $room->name }}"
+                        data-room-id="{{ $room->id }}"
+                        class="bg-white rounded-xl shadow-lg px-6 py-4 w-80 min-w-[33.333%] cursor-move draggable 
+                    hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
+                        draggable="true"
+                        ondragstart="event.dataTransfer.setData('text/plain', '{{ $room->id }}')">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">{{ $room->name }}</h3>
+                                <span class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">ID: {{ $room->id }}</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <a href="" class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-blue-500">edit</span>
+                                </a>
+                                <form action="{{ route('room.delete', ['room' => $room->id]) }}" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete this room? This action cannot be undone.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-300">
+                                        <span class="material-symbols-outlined text-red-500">delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 text-gray-700 bg-gray-50 p-2 rounded-lg">
+                            <span class="material-symbols-outlined text-gray-500">location_on</span>
+                            <p class="font-medium">{{ $room->building }}</p>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm text-gray-500 border-t pt-3">
+                            <span class="material-symbols-outlined mr-2 text-gray-400">drag_indicator</span>
+                            <p>Drag to assign to a subject</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
 
-        <p class="text-center text-white mb-6 mt-8">(Drag a <i>Room</i> to a <i>Subject</i> inorder to setup a schedule)</p>
+        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 mb-6 flex items-center justify-center space-x-3">
+            <span class="material-symbols-outlined text-white">info</span>
+            <p class="text-white text-lg font-medium">Drag a Room to a Subject to Create a Schedule</p>
+        </div>
 
+        <!-- Subjects Section -->
         @php($subjects = App\Models\Subject::all())
-        <div class="flex items-center space-x-4">
-            <a href="{{ route('subject.create') }}" class="bg-blue-300 font-bold py-2 px-4 text-center rounded shadow-lg flex items-center w-fit">
-                + Subject <div class="mx-2"></div>
-                <span class="material-symbols-outlined me-3">
-                    book
-                </span>
-            </a>
-
-            <p class="text-white text-xs self-end">Total Subjects: {{ count($subjects) }}</p>
-        </div>
-
-        <div class="mt-4 overflow-x-auto">
-            <hr>
-            <div class="flex space-x-4 my-1.5">
-                @if (count($subjects) === 0)
-                <p class="text-white text-xl font-thin my-4">No Subjects (Add subjects)</p>
-                @endif
-                @foreach($subjects as $subject)
-                <div data-subject-name="{{ $subject->name }}" class="bg-blue-300 border border-white rounded shadow px-4 py-3 w-64 cursor-move draggable" ondragover="event.preventDefault(); this.classList.add('bg-blue-400');" ondragleave="this.classList.remove('bg-blue-400');" ondrop="onDropRoom(event, this)">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-bold">{{ $subject->name }}</h2>
-                        <p class="text-sm text-gray-500">#{{ $subject->id }}</p>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <p class="text-gray-600">{{ $subject->code }}</p>
-                        <form action="{{ route('subject.delete', ['subject' => $subject->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this subject?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500">
-                                <span class="material-symbols-outlined w-4">
-                                    delete
-                                </span>
-                            </button>
-                        </form>
-                    </div>
+        <div class="bg-white/40 backdrop-blur-md rounded-xl p-8 mb-10 shadow-xl">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-2xl font-bold text-white">Subjects Management</h2>
+                    <span class="bg-white/20 px-4 py-1 rounded-full text-white text-sm">
+                        {{ count($subjects) }} Subjects
+                    </span>
                 </div>
-                @endforeach
+                <a href="{{ route('subject.create') }}"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 flex items-center group">
+                    <span class="material-symbols-outlined mr-2 group-hover:scale-110 transition-transform">add_circle</span>
+                    New Subject
+                </a>
             </div>
-            <hr>
+
+            <div class="overflow-x-auto">
+                <div class="flex space-x-6 py-4">
+                    @if (count($subjects) === 0)
+                    <div class="w-full text-center py-8">
+                        <span class="material-symbols-outlined text-white/50 text-4xl mb-2">menu_book</span>
+                        <p class="text-white text-xl font-light">No Subjects Available</p>
+                    </div>
+                    @endif
+                    @foreach($subjects as $subject)
+                    <div data-subject-name="{{ $subject->name }}"
+                        class="bg-white rounded-xl shadow-lg px-6 py-4 w-80 min-w-[33.333%] transition-all duration-300 hover:shadow-2xl relative group"
+                        ondragover="event.preventDefault(); this.classList.add('bg-blue-100', 'scale-105', 'ring-4', 'ring-blue-500', 'shadow-xl', 'shadow-indigo-200');"
+                        ondragleave="this.classList.remove('bg-blue-100', 'scale-105', 'ring-4', 'ring-blue-500', 'shadow-xl', 'shadow-indigo-200');" 
+                        ondrop="onDropRoom(event, this); this.classList.remove('bg-blue-100', 'scale-105', 'ring-4', 'ring-blue-500', 'shadow-xl', 'shadow-indigo-200');">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900">{{ $subject->name }}</h2>
+                                <div class="flex items-center space-x-2 mt-1">
+                                    <span class="material-symbols-outlined text-gray-400 text-sm">tag</span>
+                                    <p class="text-sm text-gray-600 font-medium">{{ $subject->code }}</p>
+                                </div>
+                            </div>
+                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">ID: {{ $subject->id }}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+                            <div class="flex items-center text-sm text-gray-500">
+                                <span class="material-symbols-outlined mr-2 text-gray-400">drag_indicator</span>
+                                <p>Drop room here to schedule</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="" class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-blue-500">edit</span>
+                                </a>
+                                <form action="{{ route('subject.delete', ['subject' => $subject->id]) }}" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete this subject? This action cannot be undone.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-300">
+                                        <span class="material-symbols-outlined text-red-500">delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
 
+        <!-- Schedules Section -->
+        @php($schedules = App\Models\RoomSchedule::all())
+        <div class="bg-white/40 backdrop-blur-md rounded-xl p-8 shadow-xl">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-2xl font-bold text-white">Current Schedule Overview</h2>
+                    <span class="bg-white/20 px-4 py-1 rounded-full text-white text-sm">
+                        {{ count($schedules) }} Schedules
+                    </span>
+                </div>
+            </div>
 
-        <div class="mt-4 overflow-x-auto">
-            <p class="text-white font-semibold">Existing Schedules</p>
-            <!-- 'days_recurring', // M,W,F
-        'start_time',
-        'end_time',
-        'user_id', // creator
-        'room_id',
-        'subject_id', -->
-
-            @php($schedules = App\Models\RoomSchedule::all())
-            <div class="mt-4 flex flex-wrap space-x-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($schedules as $schedule)
-                <div class="bg-blue-300 border border-white rounded shadow px-4 py-3 w-64">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-bold">{{ $schedule->room->name }}</h2>
-                        <p class="text-sm text-gray-500">#{{ $schedule->room->id }}</p>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+                    <div class="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-white">{{ $schedule->room->name }}</h3>
+                            <span class="bg-white/20 text-white text-sm px-3 py-1 rounded-full">Room {{ $schedule->room->id }}</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <p class="text-gray-600">{{ $schedule->subject->name }}</p>
-                        <p class="text-gray-600 text-sm">{{ $schedule->subject->code }}</p>
-                    </div>
-                    <div class="flex flex-col justify-between my-1">
-                        <p class="text-gray-900 text-sm">({{ implode(', ', json_decode($schedule->days_recurring)) }})</p>
-                        <p class="text-gray-900 text-xs">{{ \Carbon\Carbon::parse($schedule->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('g:i A') }}</p>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <p class="text-gray-600">By: {{ $schedule->teacher->getFullname() }}</p>
-                        <form action="{{ route('room-schedule.delete', ['roomSchedule' => $schedule->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this schedule?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500">
-                                <span class="material-symbols-outlined w-4">
-                                    delete
-                                </span>
-                            </button>
-                        </form>
+
+                    <div class="px-6 py-4 space-y-4">
+                        <div class="flex flex-col space-y-1">
+                            <div class="flex justify-between items-center">
+                                <p class="text-gray-800 font-bold text-lg">{{ $schedule->subject->name }}</p>
+                                <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-sm font-medium">{{ $schedule->subject->code }}</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex flex-wrap gap-1">
+                            <div class="flex items-center text-gray-600">
+                                <span class="material-symbols-outlined mr-2">calendar_today</span>
+                            </div>
+                                @foreach(json_decode($schedule->days_recurring) as $day)
+                                    <span class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded">{{ $day }}</span>
+                                @endforeach
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <span class="material-symbols-outlined mr-2">schedule</span>
+                                <p class="font-medium">{{ \Carbon\Carbon::parse($schedule->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('g:i A') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                            <div class="flex items-center space-x-2">
+                                <span class="material-symbols-outlined text-gray-500">person</span>
+                                <p class="text-gray-700 font-medium">{{ $schedule->teacher->getFullname() }}</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <a href=""
+                                    class="p-2 hover:bg-blue-50 rounded-full text-blue-500 transition-colors duration-300">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </a>
+                                <form action="{{ route('room-schedule.delete', ['roomSchedule' => $schedule->id]) }}" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete this schedule?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 hover:bg-red-50 rounded-full text-red-500 transition-colors duration-300">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 @endforeach

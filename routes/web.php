@@ -66,6 +66,8 @@ Route::controller(StudentController::class)
         Route::post('/student/edit/{student}', 'update');
 
         Route::post('/student/guardian/notify/{student}', 'smsNotifyGuardian');
+
+        Route::get('/student/delete/{student}', 'destroy');
     });
 
 Route::get('/rfid', [StudentController::class, 'studentView']);

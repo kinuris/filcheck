@@ -1,108 +1,92 @@
-
 @extends(Auth::user()->role === 'Teacher' ? 'layouts.teacher' : 'layouts.admin')
 
 @section('content')
-<div class="w-full">
-    <div class="w-full inline-block h-full bg-white">
-        <div class="h-16 p-4">
-            <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
+<div class="w-[calc(100vw-300px)] min-h-screen bg-gray-50">
+    <div class="w-full inline-block h-full bg-white shadow-lg">
+        <div class="h-16 p-3 border-b flex items-center justify-between">
+            <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo" class="h-8">
         </div>
-        <div class="flex flex-col p-4 mb-16 bg-blue-400 h-[calc(100%-8rem)]">
-            <div class="flex w-full mb-3 justify-between">
-                <h1 class="text-2xl font-extrabold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">STUDENT MASTERLIST</h1>
+        <div class="flex flex-col p-6 mb-16 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 h-[calc(100%-8rem)]">
+            <div class="flex w-full mb-6 justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">Student Masterlist</h1>
+                    <p class="text-blue-100">Manage and monitor student information</p>
+                </div>
                 <form action="/student">
-                    <input value="{{ request()->query('search') ?? '' }}" class="bg-blue-200 rounded border-black border shadow-lg p-2 min-w-80" placeholder="RFID | STUDENT NO. | STUDENT NAME" type="text" name="search" id="search">
+                    <div class="relative">
+                        <input value="{{ request()->query('search') ?? '' }}"
+                            class="bg-white/95 rounded-xl border-0 shadow-lg p-3 min-w-[400px] focus:ring-2 focus:ring-blue-300 focus:outline-none transition-all"
+                            placeholder="Search by RFID, Student No. or Name"
+                            type="text"
+                            name="search"
+                            id="search">
+                        <button type="submit" class="absolute right-3 top-2 text-gray-400 hover:text-blue-500 transition-colors">
+                            <span class="material-symbols-outlined">search</span>
+                        </button>
+                    </div>
                 </form>
             </div>
 
             @if (Auth::user()->role === 'Admin')
-            <a class="max-w-fit mb-5 mt-2 transition-transform hover:scale-110 shadow-lg text-md rounded border border-black p-2 bg-blue-200" href="/student/create">CREATE NEW STUDENT</a>
+            <a class="max-w-fit mb-6 transition-all hover:scale-102 shadow-lg text-md rounded-xl px-5 py-2.5 bg-white text-blue-600 font-semibold hover:bg-blue-50 flex items-center gap-2" href="/student/create">
+                <span class="material-symbols-outlined">add_circle</span>
+                Create New Student
+            </a>
             @endif
 
-            <table class="w-full shadow-lg mt-4">
-                <thead class="bg-blue-500 text-blue-950">
-                    <th class="rounded-tl-lg p-2">#</th>
-                    <th>STUDENT NO.</th>
-                    <th>LAST NAME</th>
-                    <th>FIRST NAME</th>
-                    <th>M.I.</th>
-                    <th>PARENT or<br>GUARDIAN</th>
-                    <th>PHONE #</th>
-                    <th>ADDRESS</th>
-                    @if (Auth::user()->role === 'Admin')
-                    <th>RFID</th>
-                    @else
-                    <th class="rounded-tr-lg">RFID</th>
-                    @endif
-
-                    @if (Auth::user()->role === 'Admin')
-                    <td class="rounded-tr-lg w-6"></td>
-                    @endif
-                </thead>
-                <tbody class="bg-blue-300 border-t text-center">
-                    @if(empty($students->items()))
-                    <tr>
-                        <td class="rounded-bl-lg p-2"></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-50 text-gray-700">
+                        <th class="px-3 py-2.5 text-left font-semibold">#</th>
+                        <th class="px-3 py-2.5 text-left font-semibold">Student No.</th>
+                        <th class="px-3 py-2.5 text-left font-semibold">Last Name</th>
+                        <th class="px-3 py-2.5 text-left font-semibold">First Name</th>
+                        <th class="px-3 py-2.5 text-left font-semibold">M.I.</th>
+                        <th class="px-3 py-2.5 text-left font-semibold">Phone #</th>
+                        <th class="px-3 py-2.5 text-left font-semibold">Address</th>
+                        <th class="px-3 py-2.5 text-left font-semibold">RFID</th>
                         @if (Auth::user()->role === 'Admin')
-                        <td></td>
+                        <th class="px-3 py-2.5 text-left font-semibold">Actions</th>
                         @endif
-                        <td class="rounded-br-lg p-2"></td>
-                    </tr>
-                    @endif
-                    @foreach($students as $student)
-                    <tr class="@if($loop->iteration !== count($students)) border-b @endif">
-                        @if ($loop->iteration === count($students))
-                        <td class="rounded-bl-lg border-r p-2">{{ $student->id }}</td>
-                        @else
-                        <td class="p-2 border-r">{{ $student->id }}</td>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @if(empty($students->items()))
+                        <tr>
+                            <td colspan="10" class="p-3 text-center text-gray-500">No students found</td>
+                        </tr>
                         @endif
-                        <td class="border-r">{{ $student->student_number }}</td>
-                        <td class="border-r">{{ $student->last_name }}</td>
-                        <td class="border-r">{{ $student->first_name }}</td>
-                        @if ($student->middle_name)
-                        <td class="border-r">{{ $student->middle_name[0] }}.</td>
-                        @else
-                        <td class="border-r"></td>
-                        @endif
-
-                        <td class="border-r">{{ $student->guardian }}</td>
-                        <td class="border-r">{{ $student->phone_number }}</td>
-                        <td class="border-r">{{ $student->address }}</td>
-                        @if (Auth::user()->role === 'Teacher')
-                        <td class="rounded-br-lg">{{ $student->rfid }}</td>
-                        @else
-                        <td class="border-r">{{ $student->rfid }}</td>
-                        @endif
-                        @if (Auth::user()->role === 'Admin')
-                        <td class="flex justify-center px-2">
-                            <div class="flex">
-                                <a class="flex flex-col justify-center my-1 transition-transform hover:scale-110 text-md rounded border border-black px-2 py-1 bg-blue-200" href="/student/edit/{{ $student->id }}">
-                                    <span class="material-symbols-outlined">
-                                        edit
-                                    </span>
-                                </a>
-                                <div class="ms-1"></div>
-                                <a class="flex flex-col justify-center my-1 transition-transform hover:scale-110 text-md rounded border border-black px-2 py-1 bg-blue-200" href="/student/delete/{{ $student->id }}">
-                                    <span class="material-symbols-outlined">
-                                        delete
-                                    </span>
-                                </a>
-                            </div>
-                        </td>
-                        @endif
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                        @foreach($students as $student)
+                        <tr class="hover:bg-blue-50/50 transition-colors">
+                            <td class="px-3 py-2.5">{{ $student->id }}</td>
+                            <td class="px-3 py-2.5 font-medium">{{ $student->student_number }}</td>
+                            <td class="px-3 py-2.5">{{ $student->last_name }}</td>
+                            <td class="px-3 py-2.5">{{ $student->first_name }}</td>
+                            <td class="px-3 py-2.5">{{ $student->middle_name ? $student->middle_name[0] . '.' : '' }}</td>
+                            <td class="px-3 py-2.5">{{ $student->phone_number }}</td>
+                            <td class="px-3 py-2.5 truncate max-w-[200px]">{{ $student->address }}</td>
+                            <td class="px-3 py-2.5 font-medium">{{ $student->rfid }}</td>
+                            @if (Auth::user()->role === 'Admin')
+                            <td class="px-3 py-2.5">
+                                <div class="flex gap-2">
+                                    <a href="/student/edit/{{ $student->id }}" class="p-1.5 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors" title="Edit">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </a>
+                                    <a href="/student/delete/{{ $student->id }}" 
+                                       onclick="return confirm('Are you sure you want to delete this student?')" 
+                                       class="p-1.5 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                                       title="Delete">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </a>
+                                </div>
+                            </td>
+                            @endif
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
             <div class="flex-1"></div>
-            <div>
+            <div class="mt-6">
                 {{ $students->withQueryString()->links() }}
             </div>
         </div>

@@ -302,8 +302,11 @@ class StudentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(StudentInfo $student)
     {
-        //
+        Storage::delete('public/student/images/' . $student->profile_picture);
+        $student->delete();
+
+        return redirect('/student')->with('message', 'Student deleted successfully');
     }
 }

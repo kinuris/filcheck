@@ -1,27 +1,42 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="p-3">
-    <div id="eventModal" class="z-10 inset-0 overflow-y-auto">
-        <div class="modal-container bg-white">
-            <div class="py-4 text-left px-6 shadow-lg w-fit h-fit">
-                <div class="flex justify-between items-center pb-3">
-                    <p class="text-2xl font-bold">Setup Event Node</p>
+<div class="flex justify-center items-center min-h-screen bg-gray-100 w-full">
+    <div id="eventModal" class="w-full max-w-md">
+        <div class="modal-container">
+            <div class="bg-white rounded-lg shadow-xl p-8">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Setup Event Node</h2>
                 </div>
 
-                <p class="mb-4 max-w-64 text-left text-sm">Setup an event node. Enter the event ID and click "Setup Event Node".</p>
+                <p class="mb-6 text-gray-600 text-center">
+                    Setup an event node. Enter the event ID and click "Setup Event Node".
+                </p>
 
-                <form action="/event/node/setup" method="POST">
+                <form action="/event/node/setup" method="POST" class="space-y-4">
                     @csrf
-                    <div class="flex border rounded place-items-center pl-2">
-                        <label for="event_id">
-                            <p class="text-gray-600">EVT-</p>
+                    <div class="flex border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <label for="event_id" class="bg-gray-50 px-4 py-3 text-gray-600 font-medium">
+                            EVT-
                         </label>
-                        <input class="p-2 outline-none" maxlength="6" type="text" name="event_id" id="event_id">
+                        <input 
+                            class="w-full p-3 outline-none focus:ring-2 focus:ring-green-300"
+                            maxlength="6"
+                            type="text"
+                            name="event_id"
+                            id="event_id"
+                            placeholder="Enter Event ID"
+                        >
                     </div>
-                    <input class="bg-green-300 py-1.5 px-5 rounded-lg border-black border mt-3" type="submit" value="Setup Event Node">
+                    
+                    <button type="submit" 
+                        class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg 
+                        transition duration-200 ease-in-out transform hover:-translate-y-1">
+                        Setup Event Node
+                    </button>
+
                     @error('event_id')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        <p class="text-red-500 text-sm text-center">{{ $message }}</p>
                     @enderror
                 </form>
             </div>

@@ -2,91 +2,102 @@
 
 @section('content')
 @include('components.view-logs-modal')
-<div class="w-full">
-    <div class="w-full inline-block h-full bg-white">
-        <div class="h-16 p-4">
-            <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
+<div class="w-full max-h-screen bg-gray-100 overflow-auto">
+    <div class="w-full inline-block h-full bg-white shadow-md">
+        <div class="h-16 p-4 border-b">
+            <img class="h-full" src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
         </div>
-        <div class="p-4 mb-16 bg-blue-400 h-[calc(100%-8rem)]">
-            <div class="flex flex-col">
-                <div class="flex w-full mb-3 justify-between">
-                    <h1 class="text-2xl font-extrabold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">ATTENDANCE LOG</h1>
+        <div class="p-6 max-h-[calc(100vh-4.01em)] min-h-[calc(100vh-4.01em)] bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
+            <div class="flex flex-col max-w-5xl mx-auto">
+                <div class="flex w-full mb-6 justify-between items-center">
+                    <h1 class="text-3xl font-bold text-white">Attendance Log</h1>
                     <form action="/attendance">
-                        <input value="{{ request()->query('search') ?? '' }}" class="bg-blue-200 rounded border-black border shadow-lg p-2 min-w-80" placeholder="RFID | STUDENT NO. | STUDENT NAME" type="text" name="search" id="search">
+                        <input value="{{ request()->query('search') ?? '' }}"
+                            class="bg-white rounded-lg border-0 shadow-lg p-3 w-72 focus:ring-2 focus:ring-blue-300 transition-all"
+                            placeholder="Search by RFID, Student No. or Name"
+                            type="text" name="search" id="search">
                     </form>
                 </div>
 
-                <div class="flex gap-2 my-3">
-                    <a class="px-6 py-1 bg-blue-200 text-lg font-semibold border-2 border-black rounded-lg" href="?filter=">ALL</a>
-                    <a class="px-6 py-1 bg-green-500 text-lg font-semibold border-2 border-black rounded-lg" href="?filter=IN">PRESENT</a>
-                    <a class="px-6 py-1 bg-red-500 text-lg font-semibold border-2 border-black rounded-lg" href="?filter=OUT">ABSENT</a>
+                <div class="flex gap-3 mb-6">
+                    <a class="px-6 py-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=">All Records</a>
+                    <a class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=IN">Present</a>
+                    <a class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=OUT">Absent</a>
                 </div>
             </div>
 
-            <table class="w-full shadow-lg">
-                <thead class="bg-blue-500 text-blue-950">
-                    <th class="rounded-tl-lg p-2">#</th>
-                    <th>STUDENT ID</th>
-                    <th>FULL NAME</th>
-                    <th>LEVEL</th>
-                    <th>SECTION</th>
-                    <th>DATE</th>
-                    <th>TIME</th>
-                    <th>TYPE</th>
-                    <th class="rounded-tr-lg">LOGS</th>
-                </thead>
-                <tbody class="bg-blue-300 border-t text-center">
-                    @if(empty($infos->items()))
-                    <tr>
-                        <td class="rounded-bl-lg p-2"></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td class="rounded-br-lg p-2"></td>
-                    </tr>
-                    @endif
-                    @foreach($infos as $info)
-                    <tr class="@if($loop->iteration !== count($infos)) border-b @endif">
-                        @if ($loop->iteration === count($infos))
-                        <td class="rounded-bl-lg border-r p-2">{{ $info->id }}</td>
-                        @else
-                        <td class="p-2 border-r">{{ $info->id }}</td>
-                        @endif
-                        <td class="border-r">{{ $info->student_number }}</td>
-                        <td class="border-r">{{ $info->full_name }}</td>
-                        <td class="border-r">{{ $info->year }}</td>
-                        <td class="border-r">{{ $info->section }}</td>
-                        @php($recent = $info->gateLogs()->orderBy('day', 'DESC')->orderBy('time', 'DESC')->first())
-                        @if ($recent)
-                        <td class="border-r">{{ $recent->day }}</td>
-                        <td class="border-r">{{ date_format(date_create($recent->time), 'h:i:s A') }}</td>
+            <div class="max-w-5xl mx-auto mb-6">
+                <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 text-gray-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">#</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Student ID</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Full Name</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Time</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @php
+                            $groupedInfos = $infos->groupBy('section');
+                            @endphp
 
-                        @if ($recent->type === 'IN')
-                        <td class="border-r text-green-600 font-bold text-lg">IN</td>
-                        @else
-                        <td class="border-r text-red-600 font-bold text-lg">OUT</td>
-                        @endif
-                        @else
-                        <td class="border-r">(NO RECORD)</td>
-                        <td class="border-r">(NO RECORD)</td>
-                        <td class="border-r">(NO RECORD)</td>
-                        @endif
+                            @foreach($groupedInfos as $section => $sectionInfos)
+                            <tr class="bg-gray-100">
+                                <td colspan="7" class="px-4 py-2 font-semibold">Section {{ $section }}</td>
+                            </tr>
+                            @if($sectionInfos->isEmpty())
+                            <tr>
+                                <td colspan="7" class="px-4 py-4 text-center text-gray-500">No records found</td>
+                            </tr>
+                            @endif
+                            @foreach($sectionInfos as $info)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $info->id }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $info->student_number }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $info->full_name }}</td>
+                                @php($recent = $info->gateLogs()->orderBy('day', 'DESC')->orderBy('time', 'DESC')->first())
+                                @if ($recent)
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $recent->day }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ date_format(date_create($recent->time), 'h:i:s A') }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    @if ($recent->type === 'IN')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Present</span>
+                                    @else
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Absent</span>
+                                    @endif
+                                </td>
+                                @else
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">No record</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">No record</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">No record</td>
+                                @endif
+                                <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button data-info-id="{{ $info->id }}" data-modal-btn="openViewLogsModal"
+                                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        View Logs
+                                    </button>
+                                    <a href="/attendance/record/csv/{{ $info->id }}"
+                                        class="ml-2 inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        CSV
+                                    </a>
+                                    <a href="/attendance/record/pdf/{{ $info->id }}"
+                                        class="ml-2 inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        PDF
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                        <td class="rounded-br-lg">
-                            <button data-info-id="{{ $info->id }}" data-modal-btn="openViewLogsModal" class="p-1 px-2 rounded bg-blue-500 text-white font-bold">VIEW LOGS</button>
-                            <a href="/attendance/record/csv/{{ $info->id }}" class="p-1 px-2 rounded bg-gray-500 text-white">CSV</a>
-                            <a href="/attendance/record/pdf/{{ $info->id }}" class="p-1 px-2 rounded bg-gray-500 text-white">PDF</a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            <div>
+            <div class="max-w-5xl mx-auto mt-4">
                 {{ $infos->withQueryString()->links() }}
             </div>
         </div>

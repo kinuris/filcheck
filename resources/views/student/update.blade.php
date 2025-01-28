@@ -2,151 +2,158 @@
 
 @section('content')
 <div class="w-full relative">
-    @include('includes.receiver-notifier')
+    <!-- @include('includes.receiver-notifier') -->
     <div class="w-full inline-block h-full bg-white">
         <div class="h-16 p-4">
             <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
         </div>
-        <div class="p-4 mb-16 bg-blue-400 h-[calc(100%-8rem)] max-h-[calc(100vh-8rem)]">
-            <div class="flex w-full mb-3 justify-between">
-                <h1 class="text-2xl font-extrabold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">STUDENT</h1>
-            </div>
-            <div class="rounded-lg shadow-lg bg-[#ADE3FE] min-h-[calc(100%-4rem)] max-h-[calc(100%-4rem)] overflow-scroll">
+        <div class="p-4  bg-gradient-to-r from-blue-500 to-blue-600">
+            <div class="rounded-lg shadow-lg bg-white min-h-[calc(100%-4rem)] max-h-[calc(100%-1rem)] overflow-auto">
                 <form action="/student/edit/{{ $student->id }}" enctype="multipart/form-data" method="POST">
                     @csrf
                     <div class="flex h-full">
-                        <div class="flex-[2] p-3">
-                            <div class="aspect-square rounded-lg max-w-24 mx-auto mb-2 scale-x-[-1] overflow-hidden shadow bg-black" id="vid-container">
+                        <div class="flex-[2] p-4 bg-gray-50">
+                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Profile Photo</h2>
+                            <div class="aspect-square rounded-xl max-w-28 mx-auto mb-4 scale-x-[-1] overflow-hidden shadow-lg bg-black" id="vid-container">
                                 <video class="object-cover h-full" id="video" autoplay></video>
                             </div>
 
-                            <div class="hidden aspect-square rounded-lg overflow-hidden shadow bg-black" id="canvas-container">
+                            <div class="hidden aspect-square rounded-xl overflow-hidden shadow-lg bg-black" id="canvas-container">
                                 <canvas id="canvas"></canvas>
                             </div>
 
-                            <div class="flex relative justify-center place-items-center aspect-square border-2 border-dashed border-slate-400 rounded-lg mb-5 bg-gray-50">
+                            <div class="flex relative justify-center place-items-center aspect-square border-2 border-dashed border-blue-300 rounded-xl mb-4 bg-gray-50 hover:border-blue-500 transition-colors">
                                 <img src="{{ $student->image() }}" class="object-cover aspect-square rounded-lg" name="profile" alt="Profile Preview" id="preview">
-                                <p id="profile-tag" class="hidden">Profile Picture</p>
-                                <p class="text-red-500 text-xs mt-1 absolute bottom-2 left-5">@error('profile') {{ $message }} @enderror</p>
+                                <p id="profile-tag" class="hidden text-gray-500">Profile Picture</p>
+                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('profile') {{ $message }} @enderror</p>
                             </div>
 
-                            <div class="flex mt-2">
-                                <label class="text-white cursor-pointer bg-blue-800 p-3 rounded-lg font-bold" for="profile">UPLOAD</label>
+                            <div class="flex mt-4 gap-2">
+                                <label class="flex-1 text-center text-white cursor-pointer bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-semibold transition-colors" for="profile">Upload</label>
                                 <input class="sr-only" type="file" name="profile" id="profile" accept="image/png,image/jpg,image/jpeg">
-                                <button class="bg-gray-400 text-white font-bold p-3 rounded-lg cursor-pointer ml-2" id="snap" type="button">SNAP</button>
+                                <button class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg cursor-pointer transition-colors" id="snap" type="button">Capture</button>
                             </div>
                         </div>
 
-                        <div class="flex-[3] border-l border-gray-400 h-full">
-                            <h1 class="text-center mt-3 text-blue-950 text-xl font-semibold mb-4">BASIC INFO</h1>
+                        <div class="flex-[3] border-l border-gray-200 p-4">
+                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Basic Information</h2>
 
-                            <div class="flex flex-col px-3 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="rfid">RFID TAG</label>
-                                <input value="{{ $student->rfid }}" class="bg-[#c3e8f8] border-black border rounded-lg px-2 py-1" type="text" name="rfid" id="rfid" readonly>
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('rfid') {{ $message }} @enderror</p>
-                            </div>
+                            <div class="grid gap-4">
+                                <div class="relative">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="rfid">RFID Tag</label>
+                                    <input value="{{ $student->rfid }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="text" name="rfid" id="rfid" readonly>
+                                    @error('rfid')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="student_number">STUDENT NUMBER</label>
-                                <input value="{{ $student->student_number }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('student_number') border-red-500 @enderror" type="text" name="student_number" id="student_number">
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('student_number') {{ $message }} @enderror</p>
-                            </div>
+                                <div class="relative">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="student_number">Student Number</label>
+                                    <input value="{{ $student->student_number }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('student_number') border-red-500 @enderror" type="text" name="student_number" id="student_number">
+                                    @error('student_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="firstname">FIRST NAME</label>
-                                <input value="{{ $student->first_name }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('first_name') border-red-500 @enderror" type="text" name="first_name" id="firstname">
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('first_name') {{ $message }} @enderror</p>
-                            </div>
+                                <div class="grid gap-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="relative">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="firstname">First Name</label>
+                                            <input value="{{ $student->first_name }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('first_name') border-red-500 @enderror" type="text" name="first_name" id="firstname">
+                                            @error('first_name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                        </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="middlename">MIDDLE NAME</label>
-                                <input value="{{ $student->middle_name }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('middle_name') border-red-500 @enderror" type="text" name="middle_name" id="middlename">
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('middle_name') {{ $message }} @enderror</p>
-                            </div>
+                                        <div class="relative">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="middlename">Middle Name</label>
+                                            <input value="{{ $student->middle_name }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="text" name="middle_name" id="middlename">
+                                            @error('middle_name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                        </div>
+                                    </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="lastname">LAST NAME</label>
-                                <input value="{{ $student->last_name }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('last_name') border-red-500 @enderror" type="text" name="last_name" id="lastname">
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('last_name') {{ $message }} @enderror</p>
-                            </div>
+                                    <div class="relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1" for="lastname">Last Name</label>
+                                        <input value="{{ $student->last_name }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('last_name') border-red-500 @enderror" type="text" name="last_name" id="lastname">
+                                        @error('last_name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                    </div>
+                                </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="department">DEPARTMENT</label>
-                                <select class="w-[195px] bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('department') border-red-500 @enderror" name="department" id="department">
-                                    @php($departments = \App\Models\Department::all())
-                                    @foreach($departments as $department)
-                                    <option value="{{ $department->id }}" {{ $student->department_id == $department->id ? 'selected' : '' }}>{{ $department->name }} ({{ $department->code }})</option>
-                                    @endforeach
-                                </select>
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-5">@error('department') {{ $message }} @enderror</p>
-                            </div>
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="gender">GENDER</label>
-                                <select class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-2 @error('gender') border-red-500 @enderror" name="gender" id="gender">
-                                    <option value="Male" {{ $student->gender == 'Male' ? 'selected' : '' }}>Male</option>
-                                    <option value="Female" {{ $student->gender == 'Female' ? 'selected' : '' }}>Female</option>
-                                </select>
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-5">@error('gender') {{ $message }} @enderror</p>
-                            </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1" for="department">Department</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="department" id="department">
+                                            @php($departments = \App\Models\Department::all())
+                                            @foreach($departments as $department)
+                                            <option value="{{ $department->id }}" {{ $student->department_id == $department->id ? 'selected' : '' }}>{{ $department->name }} ({{ $department->code }})</option>
+                                            @endforeach
+                                        </select>
+                                        @error('department')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                    </div>
 
-                            <div class="flex flex-col px-3 my-3  relative">
-                                <label class="font-semibold text-lg text-blue-950" for="birthdate">BIRTHDATE</label>
-                                <input value="{{ $student->birthdate }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('birthdate') border-red-500 @enderror" type="date" name="birthdate" id="birthdate">
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-5 right-3">@error('birthdate') {{ $message }} @enderror</p>
+                                    <div class="relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1" for="gender">Gender</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="gender" id="gender">
+                                            <option value="Male" {{ $student->gender == 'Male' ? 'selected' : '' }}>Male</option>
+                                            <option value="Female" {{ $student->gender == 'Female' ? 'selected' : '' }}>Female</option>
+                                        </select>
+                                        @error('gender')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                    </div>
+                                </div>
+
+                                <div class="relative">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="birthdate">Birthdate</label>
+                                    <input value="{{ $student->birthdate }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="date" name="birthdate" id="birthdate">
+                                    @error('birthdate')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex-[3] border-l border-gray-400 flex flex-col">
-                            <h1 class="text-center mt-3 text-blue-950 text-xl font-semibold mb-4">IN CASE OF EMERGENCY</h1>
+                        <div class="flex-[2] border-l border-gray-200 p-4">
+                            <h2 class="text-xl font-semibold text-gray-700 mb-4">Emergency Contact</h2>
 
-                            <div class="flex">
-                                <div class="flex flex-col px-3 relative flex-1">
-                                    <label class="font-semibold text-lg text-blue-950" for="phone">PHONE NUMBER</label>
-                                    <input value="{{ $student->phone_number }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('phone_number') border-red-500 @enderror" type="tel" name="phone_number" id="phone">
-                                    <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('phone_number') {{ $message }} @enderror</p>
+                            <div class="grid gap-4">
+                                <div class="flex gap-4 items-end">
+                                    <div class="flex-1 relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1" for="phone">Phone Number</label>
+                                        <input value="{{ $student->phone_number }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="tel" name="phone_number" id="phone">
+                                        @error('phone_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                    </div>
+                                    
                                 </div>
-                                <div class="flex flex-col relative place-items-center justify-center mr-3">
-                                    <label for="sms_activated" title="SMS delivery for this student">SMS</label>
-                                    <input {{ $student->activatedSms() ? 'checked' : '' }} class="w-5 h-5" type="checkbox" name="sms_activated" id="sms_activated">
+
+                                <div class="relative">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="guardian">Parent/Guardian</label>
+                                    <input value="{{ $student->guardian }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" type="text" name="guardian" id="guardian">
+                                    @error('guardian')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                                 </div>
-                            </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-sm text-blue-950" for="guardian">PARENT /<br>GUARDIANS</label>
-                                <input value="{{ $student->guardian }}" class="bg-[#ADE3FE] border-black border rounded-lg px-2 py-1 @error('guardian') border-red-500 @enderror" type="tel" name="guardian" id="guardian">
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('guardian') {{ $message }} @enderror</p>
-                            </div>
+                                <div class="relative">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="address">Address</label>
+                                    <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-24" name="address" id="address">{{ $student->address }}</textarea>
+                                    @error('address')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-lg text-blue-950" for="address">ADDRESS</label>
-                                <textarea class="bg-[#ADE3FE] border-black border rounded-lg min-h-28 max-h-28 px-2 py-1 @error('address') border-red-500 @enderror" name="address" id="address">{{ $student->address }}</textarea>
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('address') {{ $message }} @enderror</p>
-                            </div>
+                                <div class="pt-4 border-t border-gray-200">
+                                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Level & Section</h2>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="relative">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="year">Year Level</label>
+                                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="year" id="year">
+                                                <option {{ $student->year == 1 ? 'selected' : '' }} value="1">1st Year</option>
+                                                <option {{ $student->year == 2 ? 'selected' : '' }} value="2">2nd Year</option>
+                                                <option {{ $student->year == 3 ? 'selected' : '' }} value="3">3rd Year</option>
+                                                <option {{ $student->year == 4 ? 'selected' : '' }} value="4">4th Year</option>
+                                            </select>
+                                            @error('year')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                        </div>
 
-                            <div class="border-b border-gray-400 my-4"></div>
-                            <h1 class="text-center text-blue-950 text-xl font-semibold">LEVEL & SECTION</h1>
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-sm text-blue-950" for="year">Year</label>
-                                <select class="bg-[#ADE3FE] border-black border rounded-lg p-2 @error('year') border-red-500 @enderror" type="number" name="year" id="year">
-                                    <option {{ $student->year == 1 ? 'selected' : '' }} value="1">1st</option>
-                                    <option {{ $student->year == 2 ? 'selected' : '' }} value="2">2nd</option>
-                                    <option {{ $student->year == 3 ? 'selected' : '' }} value="3">3rd</option>
-                                    <option {{ $student->year == 4 ? 'selected' : '' }} value="4">4th</option>
-                                </select>
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('year') {{ $message }} @enderror</p>
-                            </div>
+                                        <div class="relative">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="section">Section</label>
+                                            <input placeholder="Ex. BSCS-3A" value="{{ $student->section }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase" type="text" name="section" id="section">
+                                            @error('section')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div class="flex flex-col px-3 mt-2 relative">
-                                <label class="font-semibold text-sm text-blue-950" for="section">Section</label>
-                                <input placeholder="Ex. BSCS-3A" value="{{ $student->section }}" class="bg-[#ADE3FE] uppercase border-black border rounded-lg px-2 py-1 @error('section') border-red-500 @enderror" type="text" name="section" id="section">
-                                <p class="text-red-500 text-xs mt-1 absolute -bottom-4 right-3">@error('section') {{ $message }} @enderror</p>
-                            </div>
-
-                            <div class="flex-1 text-gray-400"></div>
-
-                            <div class="flex justify-between px-3 w-full mb-3">
-                                <button class="bg-green-300 px-5 rounded-lg border-black border">SAVE</button>
-                                <a href="/student" class="bg-red-300 px-5 rounded-lg border-black border">BACK</a>
+                                <div class="flex justify-end gap-4 mt-4">
+                                    <a href="/student" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium">Cancel</a>
+                                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">Save Changes</button>
+                                </div>
                             </div>
                         </div>
                     </div>
