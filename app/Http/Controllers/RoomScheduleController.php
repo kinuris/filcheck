@@ -81,6 +81,7 @@ class RoomScheduleController extends Controller
         $roomSchedule->end_time = $request->end_time;
         $roomSchedule->section = $request->section;
         $roomSchedule->days_recurring = json_encode($request->days);
+        
         $roomSchedule->save();
 
         return redirect('/curriculum')->with('success', 'Room schedule created successfully.');

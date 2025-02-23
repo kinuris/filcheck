@@ -22,41 +22,52 @@
 
 <body>
     <div class="flex w-screen">
-        <div class="bg-gradient-to-b from-blue-950 to-blue-900 text-white h-screen min-w-[300px] max-w-[300px] shadow-xl">
-            <div class="bg-white m-1 mt-7 mb-3 rounded-lg max-w-56 min-w-56 min-h-56 mx-auto transform hover:scale-105 transition-transform duration-300">
-                <img class="aspect-square object-cover rounded-lg shadow-lg" src="{{ fake()->imageUrl() }}" alt="">
+        <div class="bg-gradient-to-b from-blue-950 to-blue-900 text-white h-screen min-w-[300px] max-w-[300px] shadow-xl pt-8">
+            @php($user = auth()->user())
+            <div class="px-6 mb-8">
+                <h2 class="text-2xl font-bold text-yellow-300 mb-1">{{ $user->getFullname() }}</h2>
+                <div class="flex items-center mb-4">
+                    <span class="material-symbols-outlined text-sm text-yellow-300 me-1">admin_panel_settings</span>
+                    <span class="text-sm font-medium text-yellow-300">Administrator</span>
+                </div>
+                <div class="border-t border-blue-800 pt-4">
+                    <div class="flex items-center text-gray-300">
+                        <span class="material-symbols-outlined text-sm me-2">calendar_today</span>
+                        <span class="text-sm">{{ date_create()->format('l, j F, Y') }}</span>
+                    </div>
+                    <div class="flex items-center text-gray-300 mt-1">
+                        <span class="material-symbols-outlined text-sm me-2">schedule</span>
+                        <span class="text-sm">{{ date_create()->format('h:i A') }}</span>
+                    </div>
+                </div>
             </div>
 
-            @php($user = auth()->user())
-            <h1 class="text-center text-xl font-semibold text-yellow-300">{{ $user->getFullname() }}</h1>
-            <h1 class="text-center text-xs font-light text-gray-300 mb-2">{{ date_create()->format('l, j F, Y') }}</h1>
-            <h1 class="text-center text-lg text-gray-200">{{ date_create()->format('h:i A') }}</h1>
-
-            <ul class="flex flex-col px-4 space-y-2">
+            <ul class="flex flex-col px-2 space-y-1 max-h-96 overflow-auto">
                 @foreach([
                 ['/admin/dashboard', 'empty_dashboard', 'Dashboard'],
                 ['/student', 'groups', 'Manage Students'],
                 ['/curriculum', 'menu_book', 'Manage Curriculum'],
                 ['/teacher', 'person', 'Manage Teachers'],
                 ['/employee', 'badge', 'Employee Attendance'],
-                ['/event', 'prescriptions', 'Events']
+                ['/department', 'domain', 'Departments'],
+                ['/event', 'prescriptions', 'Events'],
                 ] as [$url, $icon, $label])
                 <a href="{{ $url }}" class="group">
-                    <div class="p-3 rounded-lg flex items-center transition-all duration-300 {{ request()->is(trim($url, '/')) ? 'bg-blue-800 translate-x-2' : 'hover:bg-blue-800 hover:translate-x-2' }}">
-                        <span class="material-symbols-outlined me-3 {{ request()->is(trim($url, '/')) ? 'text-yellow-300' : 'group-hover:text-yellow-300' }}">
+                    <div class="p-2 rounded-lg flex items-center transition-all duration-300 {{ request()->is(trim($url, '/')) ? 'bg-blue-800 translate-x-2' : 'hover:bg-blue-800 hover:translate-x-2' }}">
+                        <span class="material-symbols-outlined me-2 {{ request()->is(trim($url, '/')) ? 'text-yellow-300' : 'group-hover:text-yellow-300' }}">
                             {{ $icon }}
                         </span>
-                        <li class="font-medium {{ request()->is(trim($url, '/')) ? 'text-yellow-300' : 'group-hover:text-yellow-300' }}">
+                        <li class="font-medium text-sm {{ request()->is(trim($url, '/')) ? 'text-yellow-300' : 'group-hover:text-yellow-300' }}">
                             {{ $label }}
                         </li>
                     </div>
                 </a>
                 @endforeach
 
-                <div class="p-3 mt-4">
-                    <a href="/logout" class="block text-gray-400 font-medium hover:text-red-400 transition-colors duration-300 text-center">
+                <div class="p-2 mt-2">
+                    <a href="/logout" class="block text-gray-400 font-medium hover:text-red-400 transition-colors duration-300 text-center text-sm">
                         <span class="material-symbols-outlined align-middle me-2">logout</span>
-                        Logout
+                        logout
                     </a>
                 </div>
             </ul>

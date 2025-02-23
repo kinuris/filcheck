@@ -29,7 +29,8 @@ return new class extends Migration
 
             $table->foreignId('department_id')
                 ->references('id')
-                ->on('departments');
+                ->on('departments')
+                ->onDelete('cascade');
 
             $table->timestamps();
         });

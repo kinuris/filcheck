@@ -42,12 +42,26 @@
 
         if (log.type === 'ENTER') {
             studentId.classList.add('text-green-500');
-            const logTime = new Date(log.time.date).toLocaleString();
-            studentId.innerHTML = `${student.first_name} ${student.last_name} ENTERED at ${logTime}`;
+            const logTime = new Date(log.time.date).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            studentId.innerHTML = `${student.first_name} ${student.last_name} has checked in at ${logTime}`;
         } else {
-            const logTime = new Date(log.time.date).toLocaleString();
+            const logTime = new Date(log.time.date).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
             studentId.classList.add('text-red-500');
-            studentId.innerHTML = `${student.first_name} ${student.last_name} EXITED at ${logTime}`;
+            studentId.innerHTML = `${student.first_name} ${student.last_name} has checked out at ${logTime}`;
         }
     });
 </script>

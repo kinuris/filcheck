@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\IrregularAttendanceRecord;
 use App\Models\RoomSchedule;
 use App\Models\ScheduleAttendanceRecord;
 use App\Models\StudentInfo;
 use App\Models\User;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,10 +15,86 @@ class AttendanceController extends Controller
     public function log(string $rfid, RoomSchedule $sched)
     {
         $student = StudentInfo::query()
+            ->whereDoesntHave('disabledRelation')
             ->where('rfid', '=', $rfid)
             ->first();
 
-        if ($student == null || $student->section !== $sched->section) {
+        $irregulars = $sched->irregulars()
+            ->get()
+            ->map(fn($irreg) => $irreg->student);
+
+        $irregularSchedules = $sched->irregulars()
+            ->get();
+
+        if ($student !== null && $irregulars->contains('id', $student->id)) {
+            $latestLog = IrregularAttendanceRecord::query()
+                ->whereRelation('irregularRoomSchedule', 'student_info_id', '=', $student->id)
+                ->whereRelation('irregularRoomSchedule', 'room_schedule_id', '=', $sched->id)
+                ->latest()
+                ->first();
+
+            if ($latestLog != null && $latestLog->type === 'IN') {
+                // $log = IrregularAttendanceRecord::create([
+                //     'student_info_id' => $student->id,
+                //     'room_schedule_id' => $sched->id,
+                //     'day' => date_create()->format('Y-m-d'),
+                //     'time' => date_create()->format('H:i:s'),
+                //     'type' => 'OUT',
+                // ]);
+
+                $log = new IrregularAttendanceRecord();
+
+                $log->irregular_room_schedule_id = $latestLog->irregular_room_schedule_id;
+                $log->day = date_create()->format('Y-m-d');
+                $log->time = date_create()->format('H:i:s');
+                $log->type = 'OUT';
+
+                $log->save();
+                $log->fresh();
+
+                $data = [
+                    'profile' => $student->image(),
+                    'fullname' => $student->fullname,
+                    'section' => $student->section . ' (Irregular)',
+                    'year' => $student->year,
+                    'date' => $log->day,
+                    'time' => date_create($log->time)->format('h:i A'),
+                ];
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => $student->fullname . ' exited at ' . $log->created_at,
+                    'student' => json_encode($data),
+                ]);
+            }
+
+            $log = new IrregularAttendanceRecord();
+
+            $log->irregular_room_schedule_id = $irregularSchedules->firstWhere(fn($sched) => $sched->student->id === $student->id)->id;
+            $log->day = date_create()->format('Y-m-d');
+            $log->time = date_create()->format('H:i:s');
+            $log->type = 'IN';
+
+            $log->save();
+            $log->fresh();
+
+            $data = [
+                'profile' => $student->image(),
+                'fullname' => $student->fullname,
+                'section' => $student->section . ' (Irregular)',
+                'year' => $student->year,
+                'date' => $log->day,
+                'time' => date_create($log->time)->format('h:i A'),
+            ];
+
+            return response()->json([
+                'status' => 'success',
+                'message' => $student->fullname . ' entered at ' . $log->created_at,
+                'student' => json_encode($data),
+            ]);
+        }
+
+        if ($student === null || $student->section !== $sched->section) {
             return response()->json([
                 'status' => 'ssnf',
                 'message' => 'Student not found or not in the same section as the schedule.',
@@ -99,7 +175,7 @@ class AttendanceController extends Controller
             $infos = $infos->whereRelation('latestLog', 'type', '=', $filter);
         }
 
-        $infos = $infos->paginate(5);
+        $infos = $infos->whereDoesntHave('disabledRelation')->paginate(5);
 
         return view('attendance.manage')->with('infos', $infos);
     }

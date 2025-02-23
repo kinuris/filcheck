@@ -29,6 +29,7 @@ class StudentInfo extends Model
     public static function getExistingSections(?int $year = null)
     {
         $unparsed = StudentInfo::query()
+            ->whereDoesntHave('disabledRelation')
             ->select('section');
 
         if ($year != null) {
@@ -60,7 +61,17 @@ class StudentInfo extends Model
             ->exists();
     }
 
-    
+    public function disabled(): bool
+    {
+        return StudentDisabled::query()
+            ->where('student_info_id', '=', $this->id)
+            ->exists();
+    }
+
+    public function disabledRelation()
+    {
+        return $this->hasOne(StudentDisabled::class);
+    }
 
     public function gateLogs()
     {

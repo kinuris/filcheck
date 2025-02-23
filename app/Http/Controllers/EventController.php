@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\EventAttendanceRecord;
+use App\Models\RoomSchedule;
 use App\Models\StudentInfo;
+use App\Models\SubjectEventAttendance;
+use App\Models\SubjectEventAttRecord;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -51,6 +54,7 @@ class EventController extends Controller
             foreach ($validated['sections'] as $section) {
                 $students = StudentInfo::query()
                     ->where('section', '=', $section)
+                    ->whereDoesntHave('disabledRelation')
                     ->get();
 
                 foreach ($students as $student) {
@@ -88,6 +92,7 @@ class EventController extends Controller
             foreach ($validated['sections'] as $section) {
                 $students = StudentInfo::query()
                     ->where('section', '=', $section)
+                    ->whereDoesntHave('disabledRelation')
                     ->get();
 
                 foreach ($students as $student) {
@@ -152,8 +157,23 @@ class EventController extends Controller
         $rfid = $request->json('rfid');
 
         $student = StudentInfo::query()
+            ->whereDoesntHave('disabledRelation')
             ->where('rfid', '=', $rfid)
             ->first();
+
+        $expected = SubjectEventAttendance::query()->where('event_id', '=', $request->json('event_id'))->where('student_info_id', '=', $student->id)->first();
+        if ($expected !== null) {
+            $lastRecord = $expected->logs()->latest()->first(); 
+
+            $record = new SubjectEventAttRecord();
+
+            $record->student_info_id = $student->id;
+            $record->subject_event_attendance_id = $expected->id;
+            $record->type = is_null($lastRecord) ? 'ENTER' : ($lastRecord->type === 'ENTER' ? 'EXIT' : 'ENTER');
+            $record->time = date_create();
+
+            $record->save();
+        }
 
         $lastRecord = EventAttendanceRecord::query()
             ->where('student_info_id', '=', $student->id)
@@ -190,6 +210,13 @@ class EventController extends Controller
         return view('event.event-teacher')->with('events', $events);
     }
 
+    public function attendanceClassView(RoomSchedule $schedule, Event $event)
+    {
+        return view('subject.event-attendance-record')
+            ->with('schedule', $schedule)
+            ->with('event', $event);
+    }
+
     public function attendanceView(Event $event)
     {
         $advisedSections = User::query()
@@ -219,8 +246,59 @@ class EventController extends Controller
             $view = $view->with('records', $latestInRecords);
         }
 
-        return $view  
+        return $view
             ->with('event', $event)
             ->with('students', $students);
+    }
+
+    public function classEvents(RoomSchedule $schedule)
+    {
+        $events = $schedule->eventAttendances()
+            ->get()
+            ->unique('event_id')
+            ->map(fn($ea) => $ea->event);
+
+        return view('subject.event-attendance')
+            ->with('schedule', $schedule)
+            ->with('events', $events);
+    }
+
+    public function createClassEvent(Request $request, RoomSchedule $schedule)
+    {
+        $request->validate([
+            'event_id' => ['required', 'exists:events,id'],
+        ]);
+
+        $exists = SubjectEventAttendance::query()
+            ->where('room_schedule_id', '=', $schedule->id)
+            ->where('event_id', '=', $request->post('event_id'))
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'event_id' => 'Event is already assigned to this class'
+            ]);
+        }
+
+        $students = $schedule->regulars()
+            ->filter(fn($s) => !$s->disabled())
+            ->merge(
+                $schedule->irregulars()
+                    ->get()
+                    ->map(fn($ir) => $ir->student)
+                    ->filter(fn($s) => !$s->disabled())
+            );
+
+        foreach ($students as $student) {
+            $attendance = new SubjectEventAttendance();
+
+            $attendance->event_id = $request->post('event_id');
+            $attendance->room_schedule_id = $schedule->id;
+            $attendance->student_info_id = $student->id;
+
+            $attendance->save();
+        }
+
+        return redirect()->route('class.events', $schedule);
     }
 }

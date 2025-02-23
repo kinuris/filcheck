@@ -58,7 +58,10 @@
                                     <a class="transition-all duration-300 hover:scale-105 p-2 rounded-lg text-blue-600 hover:bg-blue-50" href="/teacher/edit/{{ $teacher->id }}" title="Edit">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
-                                    <a class="transition-all duration-300 hover:scale-105 p-2 rounded-lg text-red-600 hover:bg-red-50" href="/teacher/delete/{{ $teacher->id }}" title="Delete">
+                                    <a class="transition-all duration-300 hover:scale-105 p-2 rounded-lg text-red-600 hover:bg-red-50" 
+                                        href="{{ route('teacher.destroy', $teacher->id) }}" 
+                                        onclick="return confirm('Are you sure you want to delete this teacher?')" 
+                                        title="Delete">
                                         <span class="material-symbols-outlined">delete</span>
                                     </a>
                                 </div>

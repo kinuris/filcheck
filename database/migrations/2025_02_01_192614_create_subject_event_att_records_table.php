@@ -11,18 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('event_attendances', function (Blueprint $table) {
+        Schema::create('subject_event_att_records', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('student_info_id')
                 ->references('id')
-                ->on('student_infos')
-                ->cascadeOnDelete();
+                ->on('student_infos');
 
-            $table->foreignId('event_id')
+            $table->foreignId('subject_event_attendance_id')
                 ->references('id')
-                ->on('events')
-                ->cascadeOnDelete();
+                ->on('subject_event_attendances');
+
+            $table->enum('type', ['ENTER', 'EXIT']);
+            $table->time('time');
 
             $table->timestamps();
         });
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('event_attendances');
+        Schema::dropIfExists('subject_event_att_records');
     }
 };

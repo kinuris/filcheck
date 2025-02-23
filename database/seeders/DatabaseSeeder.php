@@ -14,7 +14,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Department::factory(15)->create();
+        Department::query()->create([
+            'name' => 'College of Computer Studies',
+            'code' => 'CCS',
+        ]);
 
         User::query()->create([
             'first_name' => fake()->firstName(),

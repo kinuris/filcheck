@@ -8,6 +8,7 @@ use App\Models\StudentInfo;
 use App\Models\User;
 use App\Helpers\Message;
 use App\Models\EmployeeLog;
+use App\Models\StudentDisabled;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,7 @@ class StudentController extends Controller
     public function get(string $rfid)
     {
         $student = StudentInfo::query()
+            ->whereDoesntHave('disabledRelation')
             ->where('rfid', '=', $rfid)
             ->first();
 
@@ -60,6 +62,7 @@ class StudentController extends Controller
     public function log(string $rfid)
     {
         $student = StudentInfo::query()
+            ->whereDoesntHave('disabledRelation')
             ->where('rfid', '=', $rfid)
             ->first();
 
@@ -147,6 +150,10 @@ class StudentController extends Controller
                 ->orWhere('middle_name', 'like', '%' . $search . '%');
         }
 
+        if (request('show_disabled', 0) != 1) {
+            $students = $students->whereDoesntHave('disabledRelation');
+        }
+
         $students = $students->paginate(7);
 
         return view('student.manage')->with('students', $students);
@@ -166,7 +173,7 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'rfid' => ['required', 'unique:student_infos'],
+            'rfid' => ['required'],
             'student_number' => ['required', 'unique:student_infos'],
             'first_name' => ['required'],
             'middle_name' => ['nullable'],
@@ -183,6 +190,13 @@ class StudentController extends Controller
         ]);
 
         // TODO: add year and section
+        if (User::query()->where('rfid', '=', $request->rfid)->exists()) {
+            return redirect()->back()->withErrors(['rfid' => 'RFID already used by an employee'])->withInput();
+        }
+
+        if (StudentInfo::query()->whereDoesntHave('disabledRelation')->where('rfid', '=', $request->rfid)->exists()) {
+            return redirect()->back()->withErrors(['rfid' => 'RFID already exists'])->withInput();
+        }
 
         $image = $request->file('profile');
         $filename = sha1(time()) . '.' . $image->extension();
@@ -229,7 +243,7 @@ class StudentController extends Controller
     public function update(Request $request, StudentInfo $student)
     {
         $validated = $request->validate([
-            'rfid' => ['required', Rule::unique('student_infos')->ignore($student->id)],
+            'rfid' => ['required'],
             'student_number' => ['required', Rule::unique('student_infos')->ignore($student->id)],
             'first_name' => ['required'],
             'middle_name' => ['nullable'],
@@ -244,6 +258,14 @@ class StudentController extends Controller
             'year' => ['required'],
             'section' => ['required'],
         ]);
+
+        if (User::query()->where('rfid', '=', $request->rfid)->exists()) {
+            return redirect()->back()->withErrors(['rfid' => 'RFID already used by an employee'])->withInput();
+        }
+
+        if (StudentInfo::query()->whereDoesntHave('disabledRelation')->where('id', '!=', $student->id)->where('rfid', '=', $request->rfid)->exists()) {
+            return redirect()->back()->withErrors(['rfid' => 'RFID already exists'])->withInput();
+        }
 
         $validated['department_id'] = $validated['department'];
         $validated['section'] = strtoupper($validated['section']);
@@ -308,5 +330,15 @@ class StudentController extends Controller
         $student->delete();
 
         return redirect('/student')->with('message', 'Student deleted successfully');
+    }
+
+    public function decomission(StudentInfo $student)
+    {
+        $disabled = new StudentDisabled();
+        $disabled->student_info_id = $student->id;
+
+        $disabled->save();
+
+        return redirect()->route('student.index')->with('message', 'Student decomissioned successfully');
     }
 }

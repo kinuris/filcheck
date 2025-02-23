@@ -62,6 +62,10 @@ class TeacherController extends Controller
             'profile' => ['required', 'image', 'mimes:jpg,png,jpeg']
         ]);
 
+        if (StudentInfo::query()->whereDoesntHave('disabledRelation')->where('rfid', '=', $request->rfid)->exists()) {
+            return redirect()->back()->withErrors(['rfid' => 'RFID already exists'])->withInput();
+        }
+
         $validated['role'] = 'Teacher';
         $validated['department_id'] = $validated['department'];
         $validated['password'] = bcrypt($validated['password']);
@@ -94,6 +98,7 @@ class TeacherController extends Controller
     public function edit(User $teacher)
     {
         $sections = StudentInfo::query()
+            ->whereDoesntHave('disabledRelation')
             ->distinct('section')
             ->pluck('section');
 
@@ -107,6 +112,7 @@ class TeacherController extends Controller
     public function update(Request $request, User $teacher)
     {
         $validated = $request->validate([
+            'rfid' => ['required'],
             'first_name' => ['required'],
             'middle_name' => ['nullable'],
             'last_name' => ['required'],
@@ -118,6 +124,10 @@ class TeacherController extends Controller
             'profile' => ['nullable', 'image', 'mimes:jpg,png,jpeg'],
             'advisories' => ['nullable', 'array'],
         ]);
+
+        if (StudentInfo::query()->whereDoesntHave('disabledRelation')->where('rfid', '=', $request->rfid)->exists()) {
+            return redirect()->back()->withErrors(['rfid' => 'RFID already exists'])->withInput();
+        }
 
         SectionAdvisory::query()->where('user_id', $teacher->id)->delete();
         foreach ($validated['advisories'] ?? [] as $advisory) {
@@ -147,8 +157,12 @@ class TeacherController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(User $teacher)
     {
-        //
+        Storage::delete('public/users/images/' . $teacher->profile_picture);
+
+        $teacher->delete();
+
+        return redirect('/teacher')->with('message', 'Successfully deleted teacher');
     }
 }

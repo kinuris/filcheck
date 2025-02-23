@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use DateInterval;
-use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -57,7 +56,13 @@ class Event extends Model
 
     public function students()
     {
-        return $this->hasManyThrough(StudentInfo::class, EventAttendance::class, 'event_id', 'id', 'id', 'student_info_id');
+        return $this->hasManyThrough(StudentInfo::class, EventAttendance::class, 'event_id', 'id', 'id', 'student_info_id')->whereDoesntHave('disabledRelation');
+    }
+
+    public function sectionsAttending() {
+        return $this->students()
+            ->get()
+            ->unique('section');
     }
 
     public function attendances()

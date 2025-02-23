@@ -1,6 +1,6 @@
 @extends('layouts.teacher')
 
-@section('title', 'Attendance')
+@section('title', $schedule->subject->name . ' - ' . $event->name)
 
 @section('content')
 <!-- Late Modal -->
@@ -35,9 +35,8 @@
                             <div class="relative">
                                 <input type="time" name="time_threshold" id="time_threshold"
                                     class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition duration-150"
-                                    placeholder="Enter time threshold"
                                     value="{{ request()->query('late') == 1 ? old('time_threshold', request()->query('time_threshold')) : '' }}"
-                                    required>
+                                    placeholder="Enter time threshold" required>
                                 <div class="text-xs text-gray-500 mt-1">Students will be marked late after this time</div>
                             </div>
                         </div>
@@ -96,6 +95,7 @@
                         On-Time Attendance Settings
                     </h3>
                 </div>
+
                 <!-- Body -->
                 <div class="bg-white px-6 py-5">
                     <div class="space-y-6">
@@ -106,9 +106,8 @@
                             <div class="relative">
                                 <input type="time" name="time_threshold" id="time_threshold"
                                     class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-150"
-                                    placeholder="Enter time threshold"
-                                    value="{{ request()->query('ontime') == 1 ? old('time_threshold', request()->query('time_threshold')) : '' }}"
-                                    required>
+                                    placeholder="Enter time threshold" required
+                                    value="{{ request()->query('ontime') == 1 ? old('time_threshold', request()->query('time_threshold')) : '' }}">
                                 <div class="text-xs text-gray-500 mt-1">Students who enter before this time will be marked as on-time</div>
                             </div>
                         </div>
@@ -202,7 +201,8 @@
     </div>
 </div>
 
-<div class="w-full max-h-screen overflow-auto p-4 bg-gradient-to-b from-blue-600 via-blue-500 to-blue-400">
+@php($students = $schedule->eventAttendances()->get()->map(fn($ev) => $ev->student))
+<div class="w-full p-4 bg-gradient-to-b from-blue-600 via-blue-500 to-blue-400">
     <div class="mb-8 bg-gray-50 rounded-xl p-6 shadow-lg">
         <h1 class="text-4xl font-extrabold text-blue-900 mb-4 tracking-tight">{{ $event->name }}</h1>
         <div class="flex flex-wrap gap-4">
@@ -245,10 +245,8 @@
             <h2 class="text-xl font-bold text-gray-800 mb-2">Event Days</h2>
             <div class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2">
                 @for ($i = 1; $i <= $event->dayCount(); $i++)
-                    @php
-                    $dayDate = $event->start->copy()->addDays($i - 1);
-                    $isCurrentDay = $dayDate->isSameDay(now());
-                    @endphp
+                   @php($dayDate = $event->start->copy()->addDays($i - 1))
+                   @php($isCurrentDay = $dayDate->isSameDay(now()))
                     <div class="bg-white rounded-lg shadow-md p-2 border border-gray-200 
                 {{ $isCurrentDay ? 'bg-gradient-to-r from-blue-500 to-blue-600 border-blue-600' : '' }}">
                         <h3 class="text-sm font-semibold {{ $isCurrentDay ? 'text-white' : 'text-blue-800' }}">
@@ -258,7 +256,7 @@
                             {{ $dayDate->format('M d') }}
                         </p>
                     </div>
-                    @endfor
+                @endfor
             </div>
         </div>
     </div>
@@ -308,65 +306,48 @@
 
     <div class="mt-4">
         <div class="bg-white rounded-lg shadow-xl overflow-hidden">
-            <table class="w-full text-sm border-collapse">
-                <thead>
-                    <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">#</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Student ID</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Full Name</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Section</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Date</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Time</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Type</th>
-                    </tr>
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <th class="px-4 py-2 text-left font-semibold">#</th>
+                    <th class="px-4 py-2 text-left font-semibold">Student ID</th>
+                    <th class="px-4 py-2 text-left font-semibold">Full Name</th>
+                    <th class="px-4 py-2 text-left font-semibold">Section</th>
+                    <th class="px-4 py-2 text-left font-semibold">Date</th>
+                    <th class="px-4 py-2 text-left font-semibold">Time</th>
+                    <th class="px-4 py-2 text-left font-semibold">Type</th>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100">
                     @if (empty($students))
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-500 bg-gray-50/50">
-                            <p class="font-medium">No attendance records found</p>
-                        </td>
+                        <td colspan="7" class="p-3 text-center text-gray-500">No attendance records found</td>
                     </tr>
                     @endif
                     @foreach ($students as $index => $student)
-                    @php
-                    $day = $event->start->copy()->addDays((int) request()->query('day_count', 1) - 1)->startOfDay();
-                    $latest = $student->attendanceRecordOf($event)->where('created_at', '>', $day->format('Y-m-d'))->where('created_at', '<', $day->addDays(1)->format('Y-m-d'))->orderBy('created_at', 'ASC')->get()->first();
-                        $isLate = false;
-                        if (request()->query('late') == 1 && $latest) {
-                        $threshold = \Carbon\Carbon::createFromFormat('H:i', request()->query('time_threshold'));
-                        $studentTime = \Carbon\Carbon::parse($latest->time);
-                        $isLate = $studentTime->greaterThan($threshold);
-                        }
-                        @endphp
+                    @php($day = $event->start->copy()->addDays((int) request()->query('day_count', 1) - 1)->startOfDay())
+                    @php($latest = $student->attendanceRecordOf($event)->where('created_at', '>', $day->format('Y-m-d'))->where('created_at', '<', $day->addDays(1)->format('Y-m-d'))->orderBy('created_at', 'ASC')->get()->first())
+                    @php($isLate = request()->query('late') == 1 && $latest && \Carbon\Carbon::parse($latest->time)->format('H:i') > request()->query('time_threshold'))
+                    @php($isOnTime = request()->query('ontime') == 1 && $latest && \Carbon\Carbon::parse($latest->time)->format('H:i') < request()->query('time_threshold'))
 
-                        @php
-                        $isOnTime = false;
-                        if (request()->query('ontime') == 1 && $latest) {
-                        $threshold = \Carbon\Carbon::createFromFormat('H:i', request()->query('time_threshold'));
-                        $studentTime = \Carbon\Carbon::parse($latest->time);
-                        $isOnTime = $studentTime->lessThan($threshold);
-                        }
-                        @endphp
-                        <tr class="hover:bg-blue-50/50 transition-all duration-150 {{ $isLate ? 'bg-orange-200' : ($isOnTime ? 'bg-green-200' : '') }}">
-                            <td class="px-6 py-4 text-gray-500 font-medium">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4 font-medium">{{ $student->id }}</td>
-                            <td class="px-6 py-4">{{ $student->full_name }}</td>
-                            <td class="px-6 py-4">{{ $student->section }}</td>
+                        <tr class="hover:bg-blue-50/80 transition-all duration-200 
+                        @if($isLate) bg-orange-200 
+                        @elseif($isOnTime) bg-green-200 
+                        @endif">
+                            <td class="px-4 py-2.5 text-gray-600 font-medium">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td class="px-4 py-2.5 font-mono text-blue-700">{{ $student->id }}</td>
+                            <td class="px-4 py-2.5 font-medium">{{ $student->full_name }}</td>
+                            <td class="px-4 py-2.5">{{ $student->section }}</td>
                             @if (is_null($latest))
-                            <td class="px-6 py-4 text-gray-400 italic">Not recorded</td>
-                            <td class="px-6 py-4 text-gray-400 italic">Not recorded</td>
-                            <td class="px-6 py-4 text-gray-400 italic">Not recorded</td>
-                            @else
-                            <td class="px-6 py-4">{{ $latest->created_at->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 {{ $isLate ? 'text-orange-700 font-bold' : ($isOnTime ? 'text-green-700 font-bold' : '') }}">
-                                {{ \Carbon\Carbon::parse($latest->time)->format('g:i A') }}
+                            <td colspan="3" class="px-4 py-2.5 text-center">
+                                <span class="text-gray-400 bg-gray-100 px-3 py-1 rounded-full text-sm">No Record</span>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium
-                                            @if($latest->type == 'EXIT') bg-orange-100 text-orange-700
-                                            @elseif($latest->type == 'ENTER') bg-green-100 text-green-700
-                                            @endif">
+                            @else
+                            <td class="px-4 py-2.5 text-gray-600">{{ $latest->created_at->format('M d, Y') }}</td>
+                            <td class="px-4 py-2.5 font-medium">{{ \Carbon\Carbon::parse($latest->time)->format('g:i A') }}</td>
+                            <td class="px-4 py-2.5">
+                                <span class="px-3 py-1 rounded-full text-sm
+                                @if($latest->type == 'ENTER') bg-green-100 text-green-700 font-medium
+                                @elseif($latest->type == 'EXIT') bg-orange-100 text-orange-700 font-medium
+                                @endif">
                                     {{ $latest->type }}
                                 </span>
                             </td>

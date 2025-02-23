@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CurriculumController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\RoomController;
@@ -37,9 +38,11 @@ Route::controller(AdminController::class)
     });
 
 Route::controller(TeacherController::class)
-    ->middleware('role:Teacher')
+    ->middleware('role:Teacher,Admin')
     ->group(function () {
         Route::get('/teacher/dashboard', 'dashboardView');
+
+        Route::get('/teacher/{teacher}/destroy', 'destroy')->name('teacher.destroy');
     });
 
 Route::controller(TeacherController::class)
@@ -57,7 +60,7 @@ Route::controller(TeacherController::class)
 Route::controller(StudentController::class)
     ->middleware('role:Teacher,Admin')
     ->group(function () {
-        Route::get('/student', 'index');
+        Route::get('/student', 'index')->name('student.index');
 
         Route::get('/student/create', 'create');
         Route::post('/student/create', 'store');
@@ -68,6 +71,7 @@ Route::controller(StudentController::class)
         Route::post('/student/guardian/notify/{student}', 'smsNotifyGuardian');
 
         Route::get('/student/delete/{student}', 'destroy');
+        Route::get('/student/decomission/{student}', 'decomission')->name('student.decomission');
     });
 
 Route::get('/rfid', [StudentController::class, 'studentView']);
@@ -95,6 +99,11 @@ Route::controller(CurriculumController::class)
     ->middleware('role:Admin')
     ->group(function () {
         Route::get('/curriculum', 'index');
+
+        Route::get('/curriculum/{schedule}/irregular', 'irregularManage')->name('irregular.index');
+        Route::post('/curriculum/{schedule}/irregular/store', 'irregularStore')->name('irregular.store');
+
+        Route::delete('/curriculum/{irregular}/delete', 'irregularDestroy')->name('irregular.destroy');
     });
 
 Route::get('/attendance/class', [CurriculumController::class, 'classAttendance'])
@@ -104,6 +113,20 @@ Route::get('/attendance/class', [CurriculumController::class, 'classAttendance']
 Route::get('/attendance/class/{sched}', [CurriculumController::class, 'classAttendanceView'])
     ->middleware('role:Teacher')
     ->name('class.attendance.view');
+
+Route::controller(DepartmentController::class)
+    ->middleware('role:Admin')
+    ->group(function() {
+        Route::get('/department', 'index')->name('department.index');
+
+        Route::get('/department/create', 'create')->name('department.create');
+        Route::post('/department/store', 'store')->name('department.store');
+
+        Route::get('/department/edit/{department}', 'edit')->name('department.edit');
+        Route::put('/deparment/update/{department}', 'update')->name('department.update');
+
+        Route::delete('/department/delete/{department}', 'destroy')->name('department.destroy');
+    });
 
 Route::controller(EventController::class)
     ->middleware('role:Admin')
@@ -123,6 +146,7 @@ Route::controller(EventController::class)
         Route::get('/event/node/setup', 'nodeEventLoggerView');
         Route::post('/event/node/setup', 'nodeSetup');
         Route::post('/event/node/attendance/log', 'nodeEventAttendanceLog');
+
     });
 
 Route::controller(EventController::class)
@@ -131,6 +155,11 @@ Route::controller(EventController::class)
         Route::get('/event/view', 'teacherView');
 
         Route::get('/event/{event}/attendance', 'attendanceView')->name('event.attendance');
+
+        Route::get('/attendance/event/class/{schedule}', 'classEvents')->name('class.events');
+        Route::post('/attendance/event/class/{schedule}/create', 'createClassEvent')->name('class.event-create');
+
+        Route::get('/attendance/{schedule}/event/{event}', 'attendanceClassView')->name('class.event-attendance');
     });
 
 Route::controller(RoomController::class)

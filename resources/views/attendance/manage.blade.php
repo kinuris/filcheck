@@ -1,5 +1,7 @@
 @extends('layouts.teacher')
 
+@section('title', 'Attendance Log')
+
 @section('content')
 @include('components.view-logs-modal')
 <div class="w-full max-h-screen bg-gray-100 overflow-auto">
