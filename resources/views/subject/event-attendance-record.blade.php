@@ -202,20 +202,19 @@
 </div>
 
 @php($students = $schedule->eventAttendances()->get()->map(fn($ev) => $ev->student))
-<div class="w-full p-4 bg-gradient-to-b from-blue-600 via-blue-500 to-blue-400">
-    <div class="mb-8 bg-gray-50 rounded-xl p-6 shadow-lg">
-        <h1 class="text-4xl font-extrabold text-blue-900 mb-4 tracking-tight">{{ $event->name }}</h1>
-        <div class="flex flex-wrap gap-4">
-            <div
-                class="flex-1 min-w-[250px] bg-gradient-to-br from-blue-600/90 to-blue-800/90 rounded-lg px-4 py-3 shadow-xl">
-                <div class="flex items-center space-x-3">
-                    <svg class="w-6 h-6 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="w-full p-6 bg-gradient-to-b from-blue-600 via-blue-500 to-blue-400">
+    <div class="mb-8 bg-white rounded-xl p-8 shadow-xl border border-gray-200">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ $event->name }}</h1>
+        <div class="flex flex-wrap gap-5 mb-6">
+            <div class="flex-1 min-w-[280px] bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg px-5 py-4 shadow-xl">
+                <div class="flex items-center space-x-3 mb-2">
+                    <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <h2 class="text-lg font-semibold text-white">Start Date</h2>
+                    <h2 class="text-base font-medium text-white">Start Date</h2>
                 </div>
-                <p class="mt-2 text-blue-100 font-medium">
+                <p class="mt-1 text-blue-100 font-semibold text-lg">
                     {{ date_format($event->start, 'F d, Y') }}
                 </p>
                 <p class="text-blue-200 text-sm">
@@ -223,32 +222,31 @@
                 </p>
             </div>
 
-            <div
-                class="flex-1 min-w-[250px] bg-gradient-to-br from-sky-600/90 to-blue-600/90 rounded-lg px-4 py-3 shadow-xl">
-                <div class="flex items-center space-x-3">
-                    <svg class="w-6 h-6 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex-1 min-w-[280px] bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg px-5 py-4 shadow-xl">
+                <div class="flex items-center space-x-3 mb-2">
+                    <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <h2 class="text-lg font-semibold text-white">End Date</h2>
+                    <h2 class="text-base font-medium text-white">End Date</h2>
                 </div>
-                <p class="mt-2 text-sky-100 font-medium">
+                <p class="mt-1 text-blue-100 font-semibold text-lg">
                     {{ date_format($event->end, 'F d, Y') }}
                 </p>
-                <p class="text-sky-200 text-sm">
+                <p class="text-blue-200 text-sm">
                     {{ date_format($event->end, 'g:i A') }}
                 </p>
             </div>
         </div>
 
-        <div class="mt-4">
-            <h2 class="text-xl font-bold text-gray-800 mb-2">Event Days</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2">
+        <div class="mt-6">
+            <h2 class="text-xl font-bold text-gray-700 mb-3">Event Timeline</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2">
                 @for ($i = 1; $i <= $event->dayCount(); $i++)
                    @php($dayDate = $event->start->copy()->addDays($i - 1))
                    @php($isCurrentDay = $dayDate->isSameDay(now()))
-                    <div class="bg-white rounded-lg shadow-md p-2 border border-gray-200 
-                {{ $isCurrentDay ? 'bg-gradient-to-r from-blue-500 to-blue-600 border-blue-600' : '' }}">
+                    <div class="rounded-md shadow-sm p-2 border transition-all 
+                        {{ $isCurrentDay ? 'bg-gradient-to-r from-blue-500 to-blue-600 border-blue-600' : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow' }}">
                         <h3 class="text-sm font-semibold {{ $isCurrentDay ? 'text-white' : 'text-blue-800' }}">
                             Day {{ $i }}
                         </h3>
@@ -261,65 +259,96 @@
         </div>
     </div>
 
-    <div class="flex justify-end mb-4 bg-gray-50 p-2 rounded-lg">
+    <div class="flex justify-between items-center mb-5 bg-white p-4 rounded-lg shadow-md">
         @if (request()->query('day_count') || request()->query('time_threshold'))
-        <div class="mr-auto bg-blue-100 text-blue-800 px-4 py-2 rounded-lg">
+        <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-md border border-blue-200">
+            <span class="font-medium">Filters:</span>
             @if (request()->query('day_count'))
-            <span class="font-medium">Day {{ request()->query('day_count') }}</span>
+            <span class="ml-2 font-medium">Day {{ request()->query('day_count') }}</span>
             @endif
             @if (request()->query('time_threshold'))
-            <span class="font-medium ml-2">
+            <span class="ml-2">
                 Time: {{ \Carbon\Carbon::createFromFormat('H:i', request()->query('time_threshold'))->format('g:i A') }}
             </span>
             @endif
         </div>
+        @else
+        <div></div>
         @endif
 
-        <button onclick="document.getElementById('lateModal').classList.remove('hidden')"
-            class="shadow bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mr-2">
-            Late
-        </button>
-        <button onclick="document.getElementById('onTimeModal').classList.remove('hidden')"
-            class="shadow bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2">
-            On Time
-        </button>
-        <button onclick="document.getElementById('absentModal').classList.remove('hidden')" class="shadow bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-            Absent
-        </button>
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('onTimeModal').classList.remove('hidden')"
+                class="shadow-sm bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                On Time
+            </button>
+            <button onclick="document.getElementById('lateModal').classList.remove('hidden')"
+                class="shadow-sm bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Late
+            </button>
+            <button onclick="document.getElementById('absentModal').classList.remove('hidden')" 
+                class="shadow-sm bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Absent
+            </button>
+        </div>
     </div>
 
-    @if (request()->query('late') == 1)
-    <div class="bg-orange-500 text-white text-center p-2 rounded mb-2">
-        <p>Students are marked as late are <b></i>ORANGE</i></b>. Late if student entered after:
-            {{ \Carbon\Carbon::createFromFormat('H:i', request()->query('time_threshold'))->format('g:i A') }}
-        </p>
-    </div>
-    @endif
+    @if (request()->query('late') == 1 || request()->query('ontime') == 1)
+    <div class="mb-5">
+        @if (request()->query('late') == 1)
+        <div class="bg-orange-500 bg-opacity-90 text-white text-center p-3 rounded-md shadow-md border border-orange-600">
+            <div class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p>Students marked as <strong>late</strong> are highlighted in orange. Late threshold: 
+                    <strong>{{ \Carbon\Carbon::createFromFormat('H:i', request()->query('time_threshold'))->format('g:i A') }}</strong>
+                </p>
+            </div>
+        </div>
+        @endif
 
-    @if (request()->query('ontime') == 1)
-    <div class="bg-green-500 text-white text-center p-2 rounded mb-2">
-        <p>Students are marked as on time are <b><i>GREEN</i></b>. On time if student entered before:
-            {{ \Carbon\Carbon::createFromFormat('H:i', request()->query('time_threshold'))->format('g:i A') }}
-        </p>
+        @if (request()->query('ontime') == 1)
+        <div class="bg-green-600 bg-opacity-90 text-white text-center p-3 rounded-md shadow-md border border-green-700">
+            <div class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <p>Students marked as <strong>on time</strong> are highlighted in green. On time threshold: 
+                    <strong>{{ \Carbon\Carbon::createFromFormat('H:i', request()->query('time_threshold'))->format('g:i A') }}</strong>
+                </p>
+            </div>
+        </div>
+        @endif
     </div>
     @endif
 
     <div class="mt-4">
-        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+        <div class="bg-white rounded-lg shadow-xl overflow-hidden border border-gray-200">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-600">
-                    <th class="px-4 py-2 text-left font-semibold">#</th>
-                    <th class="px-4 py-2 text-left font-semibold">Student ID</th>
-                    <th class="px-4 py-2 text-left font-semibold">Full Name</th>
-                    <th class="px-4 py-2 text-left font-semibold">Section</th>
-                    <th class="px-4 py-2 text-left font-semibold">Date</th>
-                    <th class="px-4 py-2 text-left font-semibold">Time</th>
-                    <th class="px-4 py-2 text-left font-semibold">Type</th>
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">#</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Student ID</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Full Name</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Section</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Date</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Time</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Type</th>
+                    </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @if (empty($students))
                     <tr>
-                        <td colspan="7" class="p-3 text-center text-gray-500">No attendance records found</td>
+                        <td colspan="7" class="p-4 text-center text-gray-500">No attendance records found</td>
                     </tr>
                     @endif
                     @foreach ($students as $index => $student)
@@ -328,32 +357,37 @@
                     @php($isLate = request()->query('late') == 1 && $latest && \Carbon\Carbon::parse($latest->time)->format('H:i') > request()->query('time_threshold'))
                     @php($isOnTime = request()->query('ontime') == 1 && $latest && \Carbon\Carbon::parse($latest->time)->format('H:i') < request()->query('time_threshold'))
 
-                        <tr class="hover:bg-blue-50/80 transition-all duration-200 
-                        @if($isLate) bg-orange-200 
-                        @elseif($isOnTime) bg-green-200 
+                    <tr class="hover:bg-blue-50/50 transition-all duration-200 
+                        @if($isLate) bg-orange-50 hover:bg-orange-100/80 
+                        @elseif($isOnTime) bg-green-50 hover:bg-green-100/80 
                         @endif">
-                            <td class="px-4 py-2.5 text-gray-600 font-medium">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</td>
-                            <td class="px-4 py-2.5 font-mono text-blue-700">{{ $student->id }}</td>
-                            <td class="px-4 py-2.5 font-medium">{{ $student->full_name }}</td>
-                            <td class="px-4 py-2.5">{{ $student->section }}</td>
-                            @if (is_null($latest))
-                            <td colspan="3" class="px-4 py-2.5 text-center">
-                                <span class="text-gray-400 bg-gray-100 px-3 py-1 rounded-full text-sm">No Record</span>
-                            </td>
-                            @else
-                            <td class="px-4 py-2.5 text-gray-600">{{ $latest->created_at->format('M d, Y') }}</td>
-                            <td class="px-4 py-2.5 font-medium">{{ \Carbon\Carbon::parse($latest->time)->format('g:i A') }}</td>
-                            <td class="px-4 py-2.5">
-                                <span class="px-3 py-1 rounded-full text-sm
-                                @if($latest->type == 'ENTER') bg-green-100 text-green-700 font-medium
-                                @elseif($latest->type == 'EXIT') bg-orange-100 text-orange-700 font-medium
-                                @endif">
-                                    {{ $latest->type }}
-                                </span>
-                            </td>
-                            @endif
-                        </tr>
-                        @endforeach
+                        <td class="px-4 py-3 text-gray-600 font-medium">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                        <td class="px-4 py-3 font-mono text-blue-700 font-medium">{{ $student->id }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ $student->full_name }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $student->section }}</td>
+                        @if (is_null($latest))
+                        <td colspan="3" class="px-4 py-3 text-center">
+                            <span class="text-gray-500 bg-gray-100 px-3 py-1 rounded-full text-xs font-medium">No Record</span>
+                        </td>
+                        @else
+                        <td class="px-4 py-3 text-gray-600">{{ $latest->created_at->format('M d, Y') }}</td>
+                        <td class="px-4 py-3 font-medium 
+                            @if($isLate) text-orange-700 
+                            @elseif($isOnTime) text-green-700 
+                            @else text-gray-800 @endif">
+                            {{ \Carbon\Carbon::parse($latest->time)->format('g:i A') }}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium
+                            @if($latest->type == 'ENTER') bg-green-100 text-green-700
+                            @elseif($latest->type == 'EXIT') bg-orange-100 text-orange-700
+                            @endif">
+                                {{ $latest->type }}
+                            </span>
+                        </td>
+                        @endif
+                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>

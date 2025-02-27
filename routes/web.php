@@ -107,8 +107,7 @@ Route::controller(CurriculumController::class)
     });
 
 Route::get('/attendance/class', [CurriculumController::class, 'classAttendance'])
-    ->middleware('role:Teacher')
-    ->name('class.attendance');
+    ->middleware('role:Teacher')    ->name('class.attendance');
 
 Route::get('/attendance/class/{sched}', [CurriculumController::class, 'classAttendanceView'])
     ->middleware('role:Teacher')
