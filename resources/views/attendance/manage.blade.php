@@ -15,16 +15,16 @@
                     <h1 class="text-3xl font-bold text-white">Attendance Log</h1>
                     <form action="/attendance">
                         <input value="{{ request()->query('search') ?? '' }}"
-                            class="bg-white rounded-lg border-0 shadow-lg p-3 w-72 focus:ring-2 focus:ring-blue-300 transition-all"
+                            class="bg-white rounded-lg border-0 shadow-lg p-3 w-96 focus:ring-2 focus:ring-blue-300 transition-all"
                             placeholder="Search by RFID, Student No. or Name"
                             type="text" name="search" id="search">
                     </form>
                 </div>
 
                 <div class="flex gap-3 mb-6">
-                    <a class="px-6 py-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=">All Records</a>
-                    <a class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=IN">Present</a>
-                    <a class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=OUT">Absent</a>
+                    <a class="px-6 py-2 {{ !request('filter') ? 'bg-blue-600 text-white border-2 border-white' : 'bg-white text-gray-700 hover:bg-gray-50' }} text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=">All Records</a>
+                    <a class="px-6 py-2 {{ request('filter') == 'IN' ? 'bg-blue-600 text-white border-2 border-white' : 'bg-green-500 text-white hover:bg-green-600' }} text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=IN">Present</a>
+                    <a class="px-6 py-2 {{ request('filter') == 'OUT' ? 'bg-blue-600 text-white border-2 border-white' : 'bg-red-500 text-white hover:bg-red-600' }} text-sm font-semibold rounded-lg transition-colors shadow-md" href="?filter=OUT">Absent</a>
                 </div>
             </div>
 
@@ -128,6 +128,10 @@
         viewLogsModal.classList.remove('hidden');
 
         closeViewLogsModal.addEventListener('click', () => {
+            const url = new URL(window.location);
+            url.searchParams.delete('info_id');
+
+            window.history.replaceState({}, '', url);
             viewLogsModal.classList.add('hidden');
         });
 

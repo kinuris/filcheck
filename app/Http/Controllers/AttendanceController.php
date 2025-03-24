@@ -210,6 +210,35 @@ class AttendanceController extends Controller
         return view('attendance.pdf-generate', ['info' => $info]);
     }
 
+    public function teacher_generate_csv_file(User $user) {
+        $handle = fopen('php://output', 'w');
+
+        $cb = function () use ($handle, $user) {
+            $logs = $user->gateLogs()->get();
+
+            fputcsv($handle, ['DATE', 'TIME', 'ACTION']);
+            foreach ($logs as $log) {
+                fputcsv($handle, [$log->day, $log->time, $log->type]);
+            }
+        };
+
+        $fileName = $user->last_name . '_' . date_create()->format('Y_m_d') . '_att_logs' . '.csv';
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        return response()->stream($cb, 200, $headers);
+    }
+
+    public function teacher_generate_pdf_file(User $user)
+    {
+        return view('attendance.teacher-pdf-generate', ['user' => $user]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

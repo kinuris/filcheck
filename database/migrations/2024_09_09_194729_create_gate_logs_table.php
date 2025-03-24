@@ -19,7 +19,8 @@ return new class extends Migration
             $table->time('time');
             $table->foreignId('student_info_id')
                 ->references('id')
-                ->on('student_infos');
+                ->on('student_infos')
+                ->cascadeOnDelete();
 
             $table->timestamps();
         });

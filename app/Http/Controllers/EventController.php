@@ -107,6 +107,13 @@ class EventController extends Controller
         return redirect('/event')->with('message', 'Successfully created ' . '(' . $validated['name'] . ')' . ' event');
     }
 
+    public function destroy(Event $event)
+    {
+        $event->delete();
+
+        return redirect('/event')->with('message', 'Successfully deleted ' . '(' . $event->name . ')' . ' event');
+    }
+
     public function nodeView()
     {
         return view('event.event-node');
@@ -163,7 +170,7 @@ class EventController extends Controller
 
         $expected = SubjectEventAttendance::query()->where('event_id', '=', $request->json('event_id'))->where('student_info_id', '=', $student->id)->first();
         if ($expected !== null) {
-            $lastRecord = $expected->logs()->latest()->first(); 
+            $lastRecord = $expected->logs()->latest()->first();
 
             $record = new SubjectEventAttRecord();
 

@@ -13,5 +13,15 @@ class Department extends Model
         'code'
     ];
 
+    public function students()
+    {
+        return $this->hasMany(StudentInfo::class);
+    }
+
+    public function teachers()
+    {
+        return $this->hasMany(User::class)->where('role', '=', 'Teacher');
+    }
+
     use HasFactory;
 }

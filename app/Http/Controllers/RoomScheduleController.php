@@ -66,6 +66,7 @@ class RoomScheduleController extends Controller
 
             if (array_intersect($existingDays, $newDays)) {
                 session()->flash('openModal', 1);
+                session()->flash('conflicting_schedule', $schedule->id);
 
                 return redirect()->back()
                     ->withErrors(['conflict' => 'The schedule conflicts with an existing schedule.'])

@@ -127,6 +127,12 @@
                                     @error('department')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                                 </div>
 
+                                <div class="relative mt-4">
+                                    <label class="text-blue-950 font-bold mb-0" for="choices">Sections Handled:</label>
+                                    <select id="choices" name="advisories[]" multiple>
+                                    </select>
+                                </div>
+
                                 <div class="flex justify-end gap-2 mt-4">
                                     <button class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">Save</button>
                                     <a href="/teacher" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">Back</a>
@@ -143,6 +149,22 @@
 
 @section('script')
 @include('includes.receiver-script')
+<script>
+        const element = document.getElementById('choices');
+        new Choices(element, {
+            placeholderValue: 'Select Section',
+            choices: [
+                <?php foreach ($sections as $section): ?> {
+                    label: '{{ $section }}',
+                    value: '{{ $section }}',
+                },
+                <?php endforeach ?>
+            ],
+            removeItems: true,
+            removeItemButton: true,
+        });
+    </script>
+
 <script>
     const canvas = document.getElementById('canvas');
     const video = document.getElementById('video');

@@ -64,8 +64,7 @@
                                     @enderror
                                 </div>
                                 <div class="relative">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="employee_id">Employee
-                                        ID</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="employee_id">Employee ID</label>
                                     <input value="{{ $teacher->employee_id }}"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('employee_id') border-red-500 @enderror"
                                         type="text" name="employee_id" id="employee_id">
@@ -229,12 +228,10 @@
                                 <select class="w-[195px] bg-[#ADE3FE] border-black border rounded-lg px-2 py-1" name="department" id="department">
                                     @php($departments = \App\Models\Department::all())
                                     @foreach ($departments as $department)
-    <option value="{{ $department->id }}" @if ($teacher->department_id == $department->id) selected @endif>{{ $department->name }} ({{ $department->code }})</option>
-    @endforeach
+                                    <option value="{{ $department->id }}" @if ($teacher->department_id == $department->id) selected @endif>{{ $department->name }} ({{ $department->code }})</option>
+                                    @endforeach
                                 </select>
                             </div> -->
-
-
                         </div>
                     </div>
                 </form>

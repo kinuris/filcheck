@@ -53,7 +53,7 @@ class SubjectController extends Controller
      */
     public function edit(Subject $subject)
     {
-        //
+        return view('subject.edit')->with('subject', $subject);
     }
 
     /**
@@ -61,7 +61,16 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255|unique:subjects,name,'.$subject->id,
+            'code' => 'required|string',
+        ]);
+
+        $subject->name = $request->input('name');
+        $subject->code = $request->input('code');
+        $subject->save();
+
+        return redirect('/curriculum')->with('success', 'Subject updated successfully.');
     }
 
     /**

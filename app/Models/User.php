@@ -25,6 +25,7 @@ class User extends Authenticatable
         'profile_picture',
         'role',
         'gender',
+        'employee_id',
         'birthdate',
         'phone_number',
         'department_id',
@@ -37,7 +38,29 @@ class User extends Authenticatable
         return $this->hasMany(EmployeeLog::class, 'user_id');
     }
 
-    public function classes() {
+    public function gateLogsByDay()
+    {
+        $logs = $this->gateLogs()
+            ->orderBy('day', 'DESC')
+            ->orderBy('time', 'DESC')
+            ->get();
+
+        $result = [];
+        foreach ($logs as $log) {
+            $key = date_create($log->day)->format('Y-m-d');
+
+            if (array_key_exists($key, $result)) {
+                array_push($result[$key], $log);
+            } else {
+                $result[$key] = array($log);
+            }
+        }
+
+        return $result;
+    }
+
+    public function classes()
+    {
         return $this->hasMany(RoomSchedule::class, 'user_id');
     }
 

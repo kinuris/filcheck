@@ -54,6 +54,15 @@ class StudentInfo extends Model
             ->where('event_id', '=', $event->id);
     }
 
+    public function getCodeAndSection() {
+        $parts = explode('-', $this->section);
+
+        return [
+            $parts[0],
+            $parts[1][1]
+        ];        
+    }
+
     public function activatedSms(): bool
     {
         return ActiveSms::query()

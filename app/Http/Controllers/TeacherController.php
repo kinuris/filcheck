@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
+use App\Models\RoomSchedule;
 use App\Models\SectionAdvisory;
 use App\Models\StudentInfo;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +17,43 @@ class TeacherController extends Controller
 {
     public function dashboardView()
     {
-        return view('teacher.dashboard');
+        $advisories = Auth::user()->advisories;
+        $students = new Collection();
+        foreach ($advisories as $advisory) {
+            $students = $students->merge(StudentInfo::query()
+                ->whereDoesntHave('disabledRelation')
+                ->where('section', '=', $advisory->section)
+                ->get());
+        }
+
+        $absent = $students->filter(function ($student) {
+            $gateLogs = $student->gateLogs;
+
+            return $gateLogs->where('created_at', '>=', now()->startOfDay())->count() < 1;
+        });
+
+        $present = $students->filter(function ($student) {
+            $gateLogs = $student->gateLogs;
+
+            return $gateLogs->where('created_at', '>=', now()->startOfDay())->count() > 0;
+        });
+
+        $events = new Collection();
+        $events = $events->merge(Event::ongoingEvents()->get())
+            ->merge(Event::upcomingEvents()->get());
+
+        $classesForToday = RoomSchedule::query()
+            ->where('user_id', Auth::id())
+            ->where('days_recurring', 'like', '%' . now()->format('D') . '%')
+            ->orderBy('start_time')
+            ->get();
+
+        return view('teacher.dashboard')
+            ->with('advisories', $advisories)
+            ->with('events', $events)
+            ->with('absent', $absent)
+            ->with('present', $present)
+            ->with('classesForToday', $classesForToday);
     }
 
     /**
@@ -30,6 +70,16 @@ class TeacherController extends Controller
                 ->orWhere('middle_name', 'like', '%' . $search . '%');
         }
 
+        // Filter by department if requested
+        if (request('dept') && request('dept') != -1) {
+            $teachers = $teachers->where('department_id', request('dept'));
+        }
+
+        // Filter by gender if requested
+        if (request('gender')) {
+            $teachers = $teachers->where('gender', request('gender'));
+        }
+
         $teachers = $teachers->paginate(7);
 
         return view('teacher.manage')->with('teachers', $teachers);
@@ -40,7 +90,18 @@ class TeacherController extends Controller
      */
     public function create()
     {
-        return view('teacher.create');
+        $sections = StudentInfo::query()
+            ->whereDoesntHave('disabledRelation')
+            ->distinct('section')
+            ->pluck('section');
+
+        $existing = SectionAdvisory::query()
+            ->distinct('section')
+            ->pluck('section');
+
+        $sections = $sections->diff($existing);
+
+        return view('teacher.create')->with('sections', $sections);
     }
 
     /**
@@ -52,6 +113,7 @@ class TeacherController extends Controller
             'first_name' => ['required'],
             'middle_name' => ['nullable'],
             'last_name' => ['required'],
+            'employee_id' => ['required', 'unique:users'],
             'phone_number' => ['required', 'unique:users'],
             'gender' => ['required'],
             'rfid' => ['required', 'unique:users'],
@@ -59,7 +121,8 @@ class TeacherController extends Controller
             'username' => ['required', 'unique:users'],
             'password' => ['required'],
             'department' => ['required'],
-            'profile' => ['required', 'image', 'mimes:jpg,png,jpeg']
+            'profile' => ['required', 'image', 'mimes:jpg,png,jpeg'],
+            'advisories' => ['nullable', 'array'],
         ]);
 
         if (StudentInfo::query()->whereDoesntHave('disabledRelation')->where('rfid', '=', $request->rfid)->exists()) {
@@ -79,7 +142,13 @@ class TeacherController extends Controller
             $validated['profile_picture'] = $filename;
         }
 
-        User::query()->create($validated);
+        $teacher = User::query()->create($validated);
+        foreach ($validated['advisories'] ?? [] as $advisory) {
+            SectionAdvisory::query()->create([
+                'user_id' => $teacher->id,
+                'section' => $advisory
+            ]);
+        }
 
         return redirect('/teacher')->with('message', 'Successfully created teacher');
     }
@@ -102,6 +171,13 @@ class TeacherController extends Controller
             ->distinct('section')
             ->pluck('section');
 
+        $existing = SectionAdvisory::query()
+            ->where('user_id', '!=', $teacher->id)
+            ->distinct('section')
+            ->pluck('section');
+
+        $sections = $sections->diff($existing);
+
         return view('teacher.update')->with('teacher', $teacher)
             ->with('sections', $sections);
     }
@@ -115,6 +191,7 @@ class TeacherController extends Controller
             'rfid' => ['required'],
             'first_name' => ['required'],
             'middle_name' => ['nullable'],
+            'employee_id' => ['required', Rule::unique('users')->ignore($teacher->id)],
             'last_name' => ['required'],
             'phone_number' => ['required', Rule::unique('users')->ignore($teacher->id)],
             'gender' => ['required'],

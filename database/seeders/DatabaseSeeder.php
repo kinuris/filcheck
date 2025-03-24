@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             'code' => 'CCS',
         ]);
 
+        $this->call(DepartmentSeeder::class);
+
         User::query()->create([
             'first_name' => fake()->firstName(),
             'middle_name' => fake()->optional()->lastName(),
@@ -54,7 +56,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => fake()->firstName(),
             'middle_name' => fake()->optional()->lastName(),
             'last_name' => fake()->lastName(),
-            'gender' => 'Male', 
+            'gender' => 'Male',
             'student_number' => str_pad(fake()->unique()->randomNumber(8), 10, '0'),
             'phone_number' => fake()->phoneNumber(),
             'profile_picture' => fake()->imageUrl(),
@@ -63,7 +65,7 @@ class DatabaseSeeder extends Seeder
             'department_id' => Department::all()->random()->id,
             'address' => fake()->address(),
             'year' => fake()->numberBetween(1, 4),
-            'section' => 'BSCS-4',
+            'section' => 'BSCS-4A',
         ]);
     }
 }

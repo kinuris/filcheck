@@ -14,6 +14,7 @@
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <link rel="stylesheet" href="https://printjs-4de6.kxcdn.com/print.min.css">
 
     @vite('resources/css/app.css')
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -48,7 +49,7 @@
                 ['/student', 'groups', 'Manage Students'],
                 ['/curriculum', 'menu_book', 'Manage Curriculum'],
                 ['/teacher', 'person', 'Manage Teachers'],
-                ['/employee', 'badge', 'Employee Attendance'],
+                ['/employee', 'badge', 'Faculty Attendance'],
                 ['/department', 'domain', 'Departments'],
                 ['/event', 'prescriptions', 'Events'],
                 ] as [$url, $icon, $label])
@@ -78,6 +79,7 @@
 
     <!-- Include Choices JavaScript (latest) -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
 
     @yield('script')
 </body>

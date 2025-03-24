@@ -1,11 +1,21 @@
 @extends('layouts.plain')
 
 @section('content')
-<div class="w-full h-screen bg-gray-100">
-    <nav class="bg-white/95 backdrop-blur-sm shadow-md">
+<div class="w-full h-screen bg-gray-100 relative">
+    <h1 id="notification" class="fixed top-[-90px] left-1/2 -translate-x-1/2 z-50 transition-all duration-500 bg-white/90 backdrop-blur-sm py-4 px-8 rounded-lg shadow-lg text-2xl font-semibold flex flex-col items-center justify-center gap-1 border-l-4 border-blue-500 min-w-[400px] max-w-[80%]">
+        <div class="flex items-center gap-3">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-3xl" id="notification-title">Status Update</span>
+        </div>
+        <p id="notification-subtitle" class="text-sm font-normal text-gray-600"></p>
+    </h1>
+
+    <nav class="bg-white/95 backdrop-blur-sm shadow-md flex items-center">
         <img class="h-16 p-3" src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
     </nav>
-    
+
     <div class="flex bg-gradient-to-r from-[#528CAC]/90 to-[#2C5282]/90 p-10 relative h-[calc(100%-8rem)]">
         <div class="flex-1 flex bg-white/50 rounded-xl shadow-2xl backdrop-blur-sm p-6">
             <div class="flex-[2] p-8 flex flex-col justify-evenly place-items-center min-w-[400px] border-r border-gray-200/80">
@@ -19,7 +29,7 @@
                     <span id="student_id">(NONE)</span>
                 </h1>
             </div>
-            
+
             <div class="flex-[3] flex flex-col p-8 justify-between">
                 <div class="space-y-6">
                     <div class="flex flex-col">
@@ -76,7 +86,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="h-16 flex items-center justify-center bg-white/95 backdrop-blur-sm shadow-inner">
         <h1 class="text-2xl font-semibold text-center flex items-center gap-2" id="status">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -88,6 +98,42 @@
 @endsection
 
 @section('script')
+
+<script>
+    let notificationTimeout = null;
+
+    function animateNotification(message, subtitle, color) {
+        const notification = document.getElementById('notification');
+        const notificationTitle = document.getElementById('notification-title');
+        const notificationSubtitle = document.getElementById('notification-subtitle');
+
+        // Clear any pending timeouts
+        if (notificationTimeout) {
+            clearTimeout(notificationTimeout);
+            notificationTimeout = null;
+        }
+
+        notificationTitle.textContent = message;
+        notificationSubtitle.textContent = subtitle || '';
+
+        notification.classList.remove('border-green-500', 'border-red-500', 'border-blue-500');
+        notification.classList.add(color === 'text-green-600' ? 'border-green-500' :
+            color === 'text-red-500' ? 'border-red-500' : 'border-blue-500');
+
+        notification.classList.remove('text-green-600', 'text-red-500');
+        notification.classList.add(color);
+
+        // Animate down
+        notification.style.transform = 'translateX(-50%) translateY(110px)';
+
+        // Animate back up after 3 seconds
+        notificationTimeout = setTimeout(() => {
+            notification.style.transform = 'translateX(-50%) translateY(0)';
+            notificationTimeout = null;
+        }, 1000);
+    }
+</script>
+
 <script>
     const stream = new EventSource('http://localhost:8081/stream/current?stream=current');
 
@@ -142,13 +188,15 @@
 
         switch (state) {
             case 'IN':
-            status.innerText = `Student ${rfid} - Entry Recorded: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
-            status.style.color = '#22C55E'; // Tailwind green-500
-            break;
+                status.innerText = `Student ${rfid} - Entry Recorded: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+                status.style.color = '#22C55E'; // Tailwind green-500
+                animateNotification('Entry Recorded', `${student.first_name} ${student.last_name}`, 'text-green-600');
+                break;
             case 'OUT':
-            status.innerText = `Student ${rfid} - Exit Recorded: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
-            status.style.color = '#EF4444'; // Tailwind red-500
-            break;
+                status.innerText = `Student ${rfid} - Exit Recorded: ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+                status.style.color = '#EF4444'; // Tailwind red-500
+                animateNotification('Exit Recorded', `${student.first_name} ${student.last_name}`, 'text-red-500');
+                break;
         }
 
         studentId.innerHTML = student.student_number;

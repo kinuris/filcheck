@@ -39,7 +39,7 @@ class StudentController extends Controller
             $data = $student->toArray();
             $data = array_merge($data, [
                 'department' => $student->department,
-                'year_sec' => 'Year Level ' . $student->year . ' & SectionU ' . $student->section,
+                'year_sec' => 'Year Level ' . $student->year . ' & Section ' . $student->section,
                 'image' => $student->image(),
             ]);
 
@@ -136,9 +136,32 @@ class StudentController extends Controller
         $advisedSections = User::query()->find(Auth::user()->id)->advisedSections;
 
         $students = $students->whereIn('section', $advisedSections->pluck('section'));
+        $courses = StudentInfo::query()
+            ->get()
+            ->map(fn($student) => $student->getCodeAndSection())
+            ->map(fn($section) => $section[0])
+            ->unique();
 
         if (Auth::user()->role === 'Admin') {
             $students = StudentInfo::query();
+        }
+
+        // Apply year filter if present
+        if (request('year')) {
+            $students = $students->where('year', '=', request('year'));
+        }
+
+        // Apply gender filter if present
+        if (request('gender')) {
+            $students = $students->where('gender', '=', request('gender'));
+        }
+
+        // Apply course filter if present
+        if (request('course')) {
+            $course = request('course');
+            $students = $students->where(function ($query) use ($course) {
+                $query->whereRaw("section LIKE ?", ["%$course%"]);
+            });
         }
 
         $search = request('search');
@@ -156,7 +179,9 @@ class StudentController extends Controller
 
         $students = $students->paginate(7);
 
-        return view('student.manage')->with('students', $students);
+        return view('student.manage')
+            ->with('students', $students)
+            ->with('courses', $courses);
     }
 
     /**
@@ -186,6 +211,7 @@ class StudentController extends Controller
             'address' => ['required'],
             'profile' => ['required', 'image', 'mimes:jpeg,png,jpg'],
             'year' => ['required'],
+            'section_letter' => ['required'],
             'section' => ['required'],
         ]);
 
@@ -205,7 +231,7 @@ class StudentController extends Controller
 
         $validated['profile_picture'] = $filename;
         $validated['department_id'] = $validated['department'];
-        $validated['section'] = strtoupper($validated['section']);
+        $validated['section'] = $validated['section'] . '-' . $validated['year'] . $validated['section_letter'];
         $validated['year'] = (int) $validated['year'][0];
 
         $student = StudentInfo::query()->create($validated);
@@ -256,6 +282,7 @@ class StudentController extends Controller
             'address' => ['required'],
             'profile' => ['nullable', 'image', 'mimes:jpeg,png,jpg'],
             'year' => ['required'],
+            'section_letter' => ['required'],
             'section' => ['required'],
         ]);
 
@@ -268,7 +295,7 @@ class StudentController extends Controller
         }
 
         $validated['department_id'] = $validated['department'];
-        $validated['section'] = strtoupper($validated['section']);
+        $validated['section'] = $validated['section'] . '-' . $validated['year'] . $validated['section_letter'];
         $validated['year'] = (int) $validated['year'][0];
 
         if ($request->has('sms_activated')) {

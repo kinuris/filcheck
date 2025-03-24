@@ -52,7 +52,7 @@ class RoomController extends Controller
      */
     public function edit(Room $room)
     {
-        //
+        return view('room.edit')->with('room', $room);
     }
 
     /**
@@ -60,7 +60,16 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'building' => 'required',
+        ]);
+
+        $room->name = $request->input('name');
+        $room->building = $request->input('building');
+        $room->save();
+
+        return redirect('/curriculum')->with('success', 'Room updated successfully.');
     }
 
     /**

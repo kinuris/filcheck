@@ -33,8 +33,8 @@
                 @foreach($departments as $department)
                 <tr class="hover:bg-gray-50 transition-colors duration-200">
                     <td class="px-6 py-4">{{ $department->id }}</td>
-                    <td class="px-6 py-4 font-medium">{{ $department->name }}</td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 font-medium text-center">{{ $department->name }}</td>
+                    <td class="px-6 py-4 flex justify-center">
                         <div class="flex gap-2">
                             <a href="{{ route('department.edit', $department->id) }}"
                                 class="bg-blue-600 hover:bg-blue-700 transition-colors duration-200 text-white px-4 py-2 rounded-lg">

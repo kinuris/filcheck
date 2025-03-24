@@ -93,6 +93,13 @@ Route::controller(AttendanceController::class)
         Route::get('/attendance/record/pdf/{info}', 'generate_pdf_file');
     });
 
+Route::controller(AttendanceController::class)
+    ->middleware('role:Admin')
+    ->group(function () {
+        Route::get('/teacher/attendance/record/pdf/{user}', 'teacher_generate_pdf_file');
+        Route::get('/teacher/attendance/record/csv/{user}', 'teacher_generate_csv_file');
+    });
+
 Route::get('/attendance/record/{rfid}/{sched}', [AttendanceController::class, 'log'])->name('class.log');
 
 Route::controller(CurriculumController::class)
@@ -130,7 +137,7 @@ Route::controller(DepartmentController::class)
 Route::controller(EventController::class)
     ->middleware('role:Admin')
     ->group(function () {
-        Route::get('/event', 'index');
+        Route::get('/event', 'index')->name('event.index');
 
         Route::get('/event/node', 'nodeView');
 
@@ -141,6 +148,7 @@ Route::controller(EventController::class)
         Route::post('/event/{event}/update', 'update');
 
         Route::get('/event/{event}/delete', 'delete');
+        Route::post('/event/{event}/destroy', 'destroy')->name('event.destroy');
 
         Route::get('/event/node/setup', 'nodeEventLoggerView');
         Route::post('/event/node/setup', 'nodeSetup');
@@ -167,6 +175,9 @@ Route::controller(RoomController::class)
         Route::get('/room/create', 'create')->name('room.create');
         Route::post('/room/create', 'store')->name('room.store');
 
+        Route::get('/room/edit/{room}', 'edit')->name('room.edit');
+        Route::post('/room/update/{room}', 'update')->name('room.update');
+
         Route::delete('/room/delete/{room}', 'destroy')->name('room.delete');
     });
 
@@ -175,6 +186,9 @@ Route::controller(SubjectController::class)
     ->group(function () {
         Route::get('/subject/create', 'create')->name('subject.create');
         Route::post('/subject/create', 'store')->name('subject.store');
+
+        Route::get('/subject/edit/{subject}', 'edit')->name('subject.edit');
+        Route::post('/subject/update/{subject}', 'update')->name('subject.update');       
 
         Route::delete('/subject/delete/{subject}', 'destroy')->name('subject.delete');
     });
@@ -194,7 +208,8 @@ Route::get('/class-node/{room}', [RoomScheduleController::class, 'classNodeView'
 
 
 Route::get('/login', [AuthController::class, 'loginView'])
-    ->middleware('guest');
+    ->middleware('guest')
+    ->name('login');
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('guest');
 
