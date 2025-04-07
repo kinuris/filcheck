@@ -85,26 +85,44 @@
             </form>
         </div>
 
-        <div class="flex items-center space-x-4 mb-8 bg-white p-4 rounded-lg shadow-lg">
-            <div class="inline-flex rounded-md shadow-sm" role="group">
-                <a href="?{{ http_build_query(array_merge(request()->query(), ['mode' => 'Reg'])) }}"
-                    class="px-8 py-3 text-sm font-medium rounded-l-lg border border-blue-600
-            {{ request('mode', 'Reg') === 'Reg' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50' }}
-            transition-all duration-200">
-                    Regular Students
-                </a>
-                <a href="?{{ http_build_query(array_merge(request()->query(), ['mode' => 'Irreg'])) }}"
-                    class="px-8 py-3 text-sm font-medium rounded-r-lg border border-blue-600
-            {{ request('mode') === 'Irreg' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50' }}
-            transition-all duration-200">
-                    Irregular Students
-                </a>
-            </div>
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <div class="flex items-center justify-between">
+                <div class="inline-flex rounded-md shadow-sm" role="group">
+                    <a href="?{{ http_build_query(array_merge(request()->query(), ['mode' => 'Reg'])) }}"
+                        class="px-4 py-2 text-sm font-medium rounded-l-lg border border-blue-600
+                {{ request('mode', 'Reg') === 'Reg' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50' }}
+                transition-all duration-200">
+                        Regular Students
+                    </a>
+                    <a href="?{{ http_build_query(array_merge(request()->query(), ['mode' => 'Irreg'])) }}"
+                        class="px-4 py-2 text-sm font-medium rounded-r-lg border border-blue-600
+                {{ request('mode') === 'Irreg' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50' }}
+                transition-all duration-200">
+                        Irregular Students
+                    </a>
+                </div>
 
-            <p>You are looking at day: </p>
-            <span class="ml-2 font-semibold text-blue-600">
-                {{ \Carbon\Carbon::parse(request('specific_class_day') ?? $class->lastClass()->format('Y-m-d'))->format('M. j, Y') }}
-            </span>
+                <div>
+                    <span class="text-gray-700 mr-2">Attendance for:</span>
+                    <span class="font-semibold text-blue-600">
+                        {{ \Carbon\Carbon::parse(request('specific_class_day') ?? $class->lastClass()->format('Y-m-d'))->format('M. j, Y') }}
+                    </span>
+                </div>
+
+                @php
+                $currentDate = request('specific_class_day') ?? $class->lastClass()->format('Y-m-d');
+                $holiday = App\Models\Holiday::where('date', $currentDate)->first();
+                @endphp
+
+                @if($holiday)
+                <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 py-2 px-4 rounded-md flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-2">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM8.547 9.547a.75.75 0 00-1.06 1.06l3.217 3.217H5.197a.75.75 0 000 1.5h5.504l-3.217 3.217a.75.75 0 101.06 1.06l4.5-4.5a.75.75 0 000-1.06l-4.5-4.5z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Holiday: <b>{{ $holiday->name }}</b></span>
+                </div>
+                @endif
+            </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -138,28 +156,28 @@
                     @foreach ($students as $student)
                     @php
                     if (request('mode') === 'Irreg') {
-                        $query = App\Models\IrregularAttendanceRecord::query()
-                            ->whereRelation('irregularRoomSchedule', 'student_info_id', '=', $student->id)
-                            ->whereRelation('irregularRoomSchedule', 'room_schedule_id', '=', $class->id);
+                    $query = App\Models\IrregularAttendanceRecord::query()
+                    ->whereRelation('irregularRoomSchedule', 'student_info_id', '=', $student->id)
+                    ->whereRelation('irregularRoomSchedule', 'room_schedule_id', '=', $class->id);
                     } else {
-                        $query = App\Models\ScheduleAttendanceRecord::query()
-                            ->where('student_info_id', $student->id)
-                            ->where('room_schedule_id', $class->id);
+                    $query = App\Models\ScheduleAttendanceRecord::query()
+                    ->where('student_info_id', $student->id)
+                    ->where('room_schedule_id', $class->id);
                     }
 
                     if (request('specific_class_day')) {
-                        $query = $query->where('day', '=', request('specific_class_day'));
+                    $query = $query->where('day', '=', request('specific_class_day'));
                     } else {
-                        $query = $query->where('day', '=', $class->lastClass()->format('Y-m-d'));
+                    $query = $query->where('day', '=', $class->lastClass()->format('Y-m-d'));
                     }
 
                     $fq = clone $query;
 
                     $log = $query->latest()
-                        ->first();
+                    ->first();
 
                     $firstLog = $fq->orderBy('created_at', 'asc')
-                        ->first();
+                    ->first();
 
                     @endphp
 
@@ -182,32 +200,50 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex">
+                                @php
+                                $isHoliday = false;
+                                $holidayName = '';
+                                $currentDate = request('specific_class_day') ?? $class->lastClass()->format('Y-m-d');
+                                $holiday = App\Models\Holiday::where('date', $currentDate)->first();
+
+                                if ($holiday) {
+                                $isHoliday = true;
+                                $holidayName = $holiday->name;
+                                }
+                                @endphp
+
+                                @if($isHoliday)
+                                <span class="px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    Holiday: {{ $holidayName }}
+                                </span>
+                                @else
                                 <span
                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                {{ $log ? ($log->type == 'IN' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') : 'bg-red-100 text-red-800' }}">
+                                    {{ $log ? ($log->type == 'IN' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') : 'bg-red-100 text-red-800' }}">
                                     {{ $log ? $log->type : 'ABSENT' }}
                                 </span>
                                 @if($firstLog)
-                                    @php
-                                        $scheduledTime = \Carbon\Carbon::parse($class->start_time);
-                                        $logTime = \Carbon\Carbon::parse($firstLog->time);
-                                        $lateThreshold = $scheduledTime->copy()->addMinutes(15);
-                                        $isLate = $logTime->gt($lateThreshold);
-                                    @endphp
+                                @php
+                                $scheduledTime = \Carbon\Carbon::parse($class->start_time);
+                                $logTime = \Carbon\Carbon::parse($firstLog->time);
+                                $lateThreshold = $scheduledTime->copy()->addMinutes(15);
+                                $isLate = $logTime->gt($lateThreshold);
+                                @endphp
 
-                                    @if($isLate)
-                                    <span class="ml-2 px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        LATE
-                                        <span class="relative ml-1 group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span class="hidden text-justify group-hover:block absolute z-10 p-2 mt-1 text-xs bg-gray-800 text-white rounded shadow-lg right-0 bottom-full w-80 whitespace-normal overflow-y-auto max-h-32">
-                                                <p class="indent-4">Students entering 15 minutes or later after the class schedule start time are marked as late.</p>
-                                            </span>
+                                @if($isLate)
+                                <span class="ml-2 px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    LATE
+                                    <span class="relative ml-1 group">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="hidden text-justify group-hover:block absolute z-10 p-2 mt-1 text-xs bg-gray-800 text-white rounded shadow-lg right-0 bottom-full w-80 whitespace-normal overflow-y-auto max-h-32">
+                                            <p class="indent-4">Students entering 15 minutes or later after the class schedule start time are marked as late.</p>
                                         </span>
                                     </span>
-                                    @endif
+                                </span>
+                                @endif
+                                @endif
                                 @endif
                             </div>
                         </td>
@@ -230,6 +266,7 @@
         let currentDate = new Date();
 
         const daysRecurring = JSON.parse('<?php echo $class->days_recurring; ?>'); // ['Mon', 'Tue']
+
         const dayMapping = {
             'Sun': 0,
             'Mon': 1,
@@ -255,6 +292,13 @@
             renderCalendar();
         });
 
+        <?php
+
+        use App\Models\Holiday;
+
+        $holidays = Holiday::all()->toArray();
+        ?>
+
         function renderCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
@@ -271,31 +315,45 @@
                 calendarDays.appendChild(document.createElement('div'));
             }
 
+            // Convert PHP holidays array to JavaScript
+            const holidays = <?php echo json_encode($holidays); ?>;
+
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const dayElement = document.createElement('div');
                 const date = new Date(year, month, day);
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const dayName = date.toLocaleString('en-US', {
                     weekday: 'short'
                 });
                 const isRecurringDay = daysRecurring.includes(dayName);
                 const isFutureDate = date > today;
 
+                // Check if the current date is a holiday
+                const isHoliday = holidays.some(holiday => holiday.date === dateString);
+
                 dayElement.textContent = day;
-                dayElement.className = `text-center py-1 cursor-pointer rounded ${
-                                        isFutureDate 
-                                            ? 'text-gray-300' 
-                                            : isRecurringDay 
-                                                ? 'bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100' 
-                                                : 'text-gray-400 hover:bg-gray-100'
-                                    }`;
+
+                let className = 'text-center py-1 cursor-pointer rounded';
+
+                if (isFutureDate) {
+                    className += ' text-gray-300';
+                } else if (isHoliday) {
+                    className += ' bg-red-200 text-red-700 font-semibold hover:bg-red-300';
+                } else if (isRecurringDay) {
+                    className += ' bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100';
+                } else {
+                    className += ' text-gray-400 hover:bg-gray-100';
+                }
+
+                dayElement.className = className;
 
                 dayElement.addEventListener('click', () => {
-                    if (isRecurringDay && !isFutureDate) {
-                        input.value =
-                            `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    if ((isRecurringDay || isHoliday) && !isFutureDate) {
+                        input.value = dateString;
                         calendar.classList.add('hidden');
                     }
                 });
+
                 calendarDays.appendChild(dayElement);
             }
         }

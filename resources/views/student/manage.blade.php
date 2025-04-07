@@ -15,7 +15,7 @@
                     <p class="text-blue-100">Comprehensive student information system</p>
                 </div>
                 <form action="/student">
-                    <div class="relative">
+                    <div class="relative flex gap-3">
                         <input value="{{ request()->query('search') ?? '' }}"
                             class="bg-white/95 rounded-lg border-0 w-full shadow-lg p-3 pl-10 min-w-[400px] focus:ring-2 focus:ring-blue-300 focus:outline-none transition-all"
                             placeholder="Search by RFID, Student No. or Name" type="text" name="search"
@@ -27,7 +27,7 @@
                         </button>
                     </div>
                     <div class="flex gap-3 mt-3">
-                        @if(request()->anyFilled(['year', 'gender', 'course']))
+                        @if(request()->anyFilled(['year', 'gender', 'course', 'section']))
                         <a href="/student" class="bg-white/20 text-white text-sm px-4 rounded-md hover:bg-white/30 transition-colors flex items-center">
                             <span class="material-symbols-outlined text-sm mr-1">close</span>
                             Clear
@@ -38,7 +38,7 @@
                             <option value="">All Years</option>
                             @for ($i = 1; $i <= 4; $i++)
                                 <option value="{{ $i }}" {{ request()->query('year') == $i ? 'selected' : '' }}>Year {{ $i }}</option>
-                                @endfor
+                            @endfor
                         </select>
 
                         <select name="gender" class="bg-white/95 rounded-md text-sm p-2 border-0 shadow-sm">
@@ -47,9 +47,16 @@
                             <option value="Female" {{ request()->query('gender') == 'Female' ? 'selected' : '' }}>Female</option>
                         </select>
 
+                        <select name="section" class="bg-white/95 rounded-md text-sm p-2 border-0 shadow-sm">
+                            <option value="">All Sections</option>
+                            @foreach(App\Models\StudentInfo::distinct('section')->get() ?? [] as $section)
+                                <option value="{{ $section->section }}" {{ request()->query('section') == $section->section ? 'selected' : '' }}>{{ $section->section ?: 'Unassigned' }}</option>
+                            @endforeach
+                        </select>
+
                         <div class="relative">
                             <input type="text" id="course-search"
-                                class="bg-white/95 rounded-md text-sm p-2 border-0 shadow-sm w-full pr-8"
+                                class="bg-white/95 rounded-md text-sm p-2 border-0 shadow-sm w-32 pr-8"
                                 placeholder="Search courses..."
                                 autocomplete="off">
                             <input type="hidden" name="course" id="course-value" value="{{ request()->query('course') }}">
@@ -156,6 +163,7 @@
                         </tr>
                         @endif
                         @foreach ($groupedStudents as $section => $sectionStudents)
+                        @if(!request()->query('section') || request()->query('section') == $section)
                         <tr class="bg-gray-50">
                             <td colspan="10" class="px-6 py-3 font-medium text-blue-600">Section: {{ $section ?: 'Unassigned' }}</td>
                         </tr>
@@ -197,6 +205,7 @@
                             @endif
                         </tr>
                         @endforeach
+                        @endif
                         @endforeach
                     </tbody>
                 </table>

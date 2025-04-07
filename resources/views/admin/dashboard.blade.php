@@ -2,9 +2,354 @@
 
 @section('content')
 <div class="max-h-screen overflow-auto bg-gradient-to-r from-blue-600 to-blue-400">
-    <!-- Top Navigation - Simplified -->
-    <nav class="bg-white border-b border-gray-200 px-6 py-3">
-    </nav>
+    <!-- Calendar Section -->
+    <div class="bg-white/80 rounded-lg shadow-lg p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-semibold text-blue-600">Philippine Holidays {{ now()->year }}</h2>
+            <div class="text-sm text-gray-500 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Official Calendar</span>
+            </div>
+        </div>
+        <div id="calendar-container" class="relative">
+            <div id="calendar-loading" class="absolute inset-0 flex items-center justify-center bg-white/50 z-10 rounded-lg hidden">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+            <div id="calendar" class="calendar-professional"></div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <style>
+        .calendar-professional .fc-button-primary {
+            background-color: #2563eb;
+            border-color: #1d4ed8;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 0.375rem;
+        }
+
+        .calendar-professional .fc-button-primary:hover {
+            background-color: #1d4ed8;
+            border-color: #1e40af;
+        }
+
+        .calendar-professional .fc-button-primary:not(:disabled).fc-button-active,
+        .calendar-professional .fc-button-primary:not(:disabled):active {
+            background-color: #1e40af;
+            border-color: #1e3a8a;
+        }
+
+        .calendar-professional .fc-col-header-cell {
+            background-color: rgba(59, 130, 246, 0.1);
+            font-weight: 600;
+        }
+
+        .calendar-professional .fc-daygrid-day.fc-day-today {
+            background-color: rgba(59, 130, 246, 0.15);
+        }
+
+        .calendar-professional .fc-event {
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            border: none;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .calendar-professional .fc-daygrid-day:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+        }
+
+        .calendar-professional .fc-event:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-professional .fc-toolbar-title {
+            font-size: 1.5rem;
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .calendar-professional .fc-header-toolbar {
+            margin-bottom: 1rem !important;
+        }
+
+        .calendar-professional .fc-theme-standard td,
+        .calendar-professional .fc-theme-standard th {
+            border-color: #e5e7eb;
+        }
+
+        .calendar-professional .fc-scrollgrid {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border-color: #e5e7eb;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var loadingEl = document.getElementById('calendar-loading');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,listMonth'
+                },
+                dateClick: function(info) {
+                    // Check if clicked date is today or in the future
+                    var clickedDate = new Date(info.dateStr);
+                    var today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    if (clickedDate >= today) {
+                        // Create modal if it doesn't exist
+                        let modal = document.getElementById('holiday-modal');
+                        if (!modal) {
+                            modal = document.createElement('div');
+                            modal.id = 'holiday-modal';
+                            modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50';
+                            let deleteButton = '';
+                            let existingHoliday = calendar.getEvents().find(event => event.startStr === info.dateStr  && event.extendedProps.source === 'PHP');
+                            if (existingHoliday) {
+                                deleteButton = `
+                                    <button id="delete-holiday" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                                        Delete
+                                    </button>
+                                `;
+                            }
+                            modal.innerHTML = `
+                                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4 transform transition-transform">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-semibold text-blue-600">Declare Holiday</h3>
+                                        <button id="close-modal" class="text-gray-400 hover:text-gray-500">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <p class="text-gray-600 mb-4">Would you like to declare <span id="selected-date" class="font-semibold"></span> as a holiday?</p>
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 text-sm font-bold mb-2" for="holiday-name">
+                                            Holiday Name
+                                        </label>
+                                        <input id="holiday-name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter holiday name">
+                                    </div>
+                                    <div class="flex justify-end space-x-3">
+                                        <button id="cancel-holiday" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">
+                                            Cancel
+                                        </button>
+                                        ${deleteButton}
+                                        <button id="confirm-holiday" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors" ${existingHoliday ? 'style="display:none;"' : ''}>
+                                            Confirm
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+
+                            document.body.appendChild(modal);
+
+                            // Add event listeners
+                            document.getElementById('close-modal').addEventListener('click', function() {
+                                modal.remove();
+                            });
+
+                            document.getElementById('cancel-holiday').addEventListener('click', function() {
+                                modal.remove();
+                            });
+
+                            document.getElementById('confirm-holiday').addEventListener('click', function() {
+                                const holidayName = document.getElementById('holiday-name').value;
+
+                                if (holidayName.trim() === '') {
+                                    alert('Please enter a holiday name');
+                                    return;
+                                }
+
+                                const formData = new FormData();
+                                formData.append('name', holidayName);
+                                formData.append('date', info.dateStr);
+
+                                fetch('/holidays/store', {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                        },
+                                        body: formData
+                                    })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('Network response was not ok');
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        // Handle success
+                                        console.log('Holiday saved:', data);
+                                        location.reload();
+                                    })
+                                    .catch(error => {
+                                        console.error('Error saving holiday:', error);
+                                        alert('Failed to save holiday.');
+                                    });
+
+                                modal.remove();
+                            });
+
+                            if (document.getElementById('delete-holiday')) {
+                                document.getElementById('delete-holiday').addEventListener('click', function() {
+                                    fetch('/holidays/' + existingHoliday.id, {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            },
+                                        })
+                                        .then(response => {
+                                            if (!response.ok) {
+                                                throw new Error('Network response was not ok');
+                                            }
+                                            return response.json();
+                                        })
+                                        .then(data => {
+                                            // Handle success
+                                            console.log('Holiday deleted:', data);
+                                            location.reload();
+                                        })
+                                        .catch(error => {
+                                            console.error('Error deleting holiday:', error);
+                                            alert('Failed to delete holiday.');
+                                        });
+
+                                    modal.remove();
+                                });
+                            }
+                        }
+
+                        // Update the selected date in the modal
+                        document.getElementById('selected-date').textContent = info.dateStr;
+
+                        // Set default holiday name if it exists
+                        let existingHoliday = calendar.getEvents().find(event => event.startStr === info.dateStr);
+                        if (existingHoliday) {
+                            document.getElementById('holiday-name').value = existingHoliday.title;
+                        }
+                    }
+
+                },
+                eventContent: function(arg) {
+                    let eventContent = arg.event.title;
+                    return {
+                        html: eventContent
+                    };
+                },
+                height: 'auto',
+                themeSystem: 'standard',
+                fixedWeekCount: false,
+                dayMaxEvents: true,
+                events: function(info, successCallback, failureCallback) {
+                    // Show loading indicator
+                    loadingEl.classList.remove('hidden');
+                    <?php
+
+                    use App\Models\Holiday;
+
+                    $holidays = Holiday::all();
+                    $holidayEvents = $holidays->map(function ($holiday) {
+                        return [
+                            'id' => $holiday->id,
+                            'title' => $holiday->name,
+                            'start' => $holiday->date,
+                            'allDay' => true,
+                            'backgroundColor' => '#eab308',
+                            'borderColor' => '#eab308',
+                            'textColor' => 'white',
+                            'extendedProps' => [
+                                'description' => $holiday->name,
+                                'type' => 'Declared Holiday',
+                                'source' => 'PHP'
+                            ]
+                        ];
+                    });
+
+                    $existingEvents = $holidayEvents->toArray();
+                    ?>
+
+                    // Fetch holidays from API
+                    fetch('https://calendarific.com/api/v2/holidays?api_key=fbC8fOBy90gl8zJxwLxp4sNyHX497I55&country=PH&year={{ now()->year }}')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.response && data.response.holidays) {
+                                var holidays = data.response.holidays.map(holiday => ({
+                                    title: holiday.name,
+                                    start: holiday.date.iso,
+                                    allDay: true,
+                                    backgroundColor: getHolidayColor(holiday.type),
+                                    borderColor: getHolidayColor(holiday.type),
+                                    textColor: 'white',
+                                    extendedProps: {
+                                        description: holiday.description,
+                                        type: holiday.type.join(', ')
+                                    }
+                                }));
+                                // Append PHP holidays to the holidays array
+                                var allHolidays = holidays.concat(<?php echo json_encode($existingEvents); ?>);
+                                successCallback(allHolidays);
+                            } else {
+                                failureCallback('No holiday data available');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching holidays:', error);
+                            failureCallback(error);
+                        })
+                        .finally(() => {
+                            // Hide loading indicator
+                            loadingEl.classList.add('hidden');
+                        });
+                },
+                eventDidMount: function(info) {
+                    // Add tooltips to events
+                    if (info.event.extendedProps.description) {
+                        info.el.title = info.event.extendedProps.description;
+                    }
+                },
+                loading: function(isLoading) {
+                    if (isLoading) {
+                        loadingEl.classList.remove('hidden');
+                    } else {
+                        loadingEl.classList.add('hidden');
+                    }
+                }
+            });
+
+            calendar.render();
+
+            // Function to determine holiday color based on type
+            function getHolidayColor(types) {
+                if (!types || !types.length) return '#3b82f6'; // Default blue
+
+                if (types.includes('National holiday')) return '#ef4444'; // Red for national
+                if (types.includes('Local holiday')) return '#f59e0b'; // Amber for local
+                if (types.includes('Religious')) return '#8b5cf6'; // Purple for religious
+                if (types.includes('Observance')) return '#10b981'; // Green for observance
+
+                return '#3b82f6'; // Default blue
+            }
+        });
+    </script>
 
     <!-- Main Content -->
     <div class="flex-1 overflow-x-hidden overflow-y-auto p-6">
@@ -112,9 +457,9 @@
                                         <div class="flex items-center gap-2">
                                             <p class="font-semibold">{{ $clockedIn }}</p>
                                             @if(count($department->teachers) > 0)
-                                                <span class="text-xs px-1.5 py-0.5 rounded {{ ($clockedIn / count($department->teachers) * 100) > 50 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                                                    {{ round($clockedIn / count($department->teachers) * 100) }}% today
-                                                </span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded {{ ($clockedIn / count($department->teachers) * 100) > 50 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                                                {{ round($clockedIn / count($department->teachers) * 100) }}% today
+                                            </span>
                                             @endif
                                         </div>
                                     </div>

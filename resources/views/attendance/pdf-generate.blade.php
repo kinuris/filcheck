@@ -9,7 +9,9 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back
         </a>
-        @php ($tw = Vite::asset('resources/css/app.css'))
+        @php
+            $tw = Vite::asset('resources/css/app.css');
+        @endphp
         <button class="bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded-lg text-blue-900 font-semibold transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2" onclick="printJS({printable: 'printableRecords', type: 'html', showModal: true, css: '{{ $tw }}' })">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             Print
@@ -22,6 +24,21 @@
             <div class="flex-1 space-y-3">
                 <div class="bg-blue-50 p-4 rounded-lg">
                     <h2 class="text-xl font-bold text-blue-800 mb-1">{{ $info->first_name }} {{ $info->middle_name ? substr($info->middle_name, 0, 1) . '. ' : '' }}{{ $info->last_name }}</h2>
+                    @php
+                        $currentMonth = date('n');
+                        $currentYear = date('Y');
+
+                        if ($currentMonth >= 6) {
+                            $schoolYearStart = $currentYear;
+                            $schoolYearEnd = $currentYear + 1;
+                        } else {
+                            $schoolYearStart = $currentYear - 1;
+                            $schoolYearEnd = $currentYear;
+                        }
+
+                        $schoolYear = $schoolYearStart . ' - ' . $schoolYearEnd;
+                    @endphp
+                    <p class="text-blue-600">School Year: {{ $schoolYear }}</p>
                     <p class="text-blue-600">ID: {{ $info->student_number }}</p>
                 </div>
             </div>

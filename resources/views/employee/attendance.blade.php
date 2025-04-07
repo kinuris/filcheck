@@ -105,7 +105,9 @@
                         </tr>
 
                         @foreach ($departmentUsers as $index => $user)
-                        @php($latestLog = $user->gateLogs()->where('created_at', '>=', now()->startOfDay())->latest()->first())
+                        @php
+                            $latestLog = $user->gateLogs()->where('created_at', '>=', now()->startOfDay())->latest()->first()
+                        @endphp
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="p-2.5">{{ $index + 1 }}</td>
                             <td class="p-2.5">{{ $user->employee_id }}</td>
@@ -129,7 +131,15 @@
                             <td class="p-2.5 text-gray-500">{{ date('Y-m-d') }}</td>
                             <td class="p-2.5 text-gray-500">-</td>
                             <td class="p-2.5">
-                                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">Not Entered Today</span>
+                                @php
+                                    $today = date('Y-m-d');
+                                    $holiday = \App\Models\Holiday::where('date', $today)->first();
+                                @endphp
+                                @if($holiday)
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Holiday: {{ $holiday->name }}</span>
+                                @else
+                                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">Not Entered Today</span>
+                                @endif
                             </td>
                             @endif
                             <td class="p-2.5 text-right">

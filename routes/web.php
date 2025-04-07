@@ -7,6 +7,7 @@ use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomScheduleController;
 use App\Http\Controllers\StudentController;
@@ -77,6 +78,13 @@ Route::controller(StudentController::class)
 Route::get('/rfid', [StudentController::class, 'studentView']);
 Route::get('/student/get/{rfid}', [StudentController::class, 'get']);
 Route::post('/student/log/{rfid}', [StudentController::class, 'log']);
+
+Route::controller(HolidayController::class)
+    ->middleware('role:Admin')
+    ->group(function () {
+        Route::post('/holidays/store', 'store')->name('holidays.store');
+        Route::delete('/holidays/{holiday}', 'destroy')->name('holidays.destroy');
+    });
 
 Route::controller(EmployeeController::class)
     ->middleware('role:Admin')
