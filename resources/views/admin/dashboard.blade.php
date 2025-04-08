@@ -400,8 +400,24 @@
 
         <!-- Departments Section -->
         <div class="bg-white/80 rounded-lg shadow mb-8">
-            <div class="px-6 pb-0 py-4 border-b border-gray-200">
-                <h2 class="text-2xl font-semibold text-blue-600">Department Overview</h2>
+            <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                <div class="flex items-center">
+                    <h2 class="text-2xl font-semibold text-blue-600">Department Overview</h2>
+                    @php
+                    $today = now()->toDateString();
+                    $holidayToday = \App\Models\Holiday::where('date', $today)->first();
+                    @endphp
+                    @if($holidayToday)
+                    <span class="ml-3 px-3 py-1 text-sm bg-red-100 text-red-600 rounded-full">
+                        <span class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                            Today's Holiday: <span class="font-bold ml-1 text-red-800">{{ $holidayToday->name }}</span>
+                        </span>
+                    </span>
+                    @endif
+                </div>
             </div>
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
