@@ -15,12 +15,24 @@
                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                     <h3 class="text-lg font-medium text-gray-700">Present Today</h3>
                     <p class="text-3xl font-bold text-green-600">{{ count($present) }}</p>
-                    <p class="text-sm text-gray-500">{{ number_format(count($present) / (count($present) + count($absent)) * 100, 2) }}% of students</p>
+                    <p class="text-sm text-gray-500">
+                        @if(count($present) + count($absent) > 0)
+                            {{ number_format(count($present) / (count($present) + count($absent)) * 100, 2) }}% of students
+                        @else
+                            No students yet
+                        @endif
+                    </p>
                 </div>
                 <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                     <h3 class="text-lg font-medium text-gray-700">Absent Today</h3>
                     <p class="text-3xl font-bold text-red-600">{{ count($absent) }}</p>
-                    <p class="text-sm text-gray-500">{{ number_format(count($absent) / (count($present) + count($absent)) * 100, 2) }}% of students</p>
+                    <p class="text-sm text-gray-500">
+                        @if(count($present) + count($absent) > 0)
+                            {{ number_format(count($absent) / (count($present) + count($absent)) * 100, 2) }}% of students
+                        @else
+                            No students yet
+                        @endif
+                    </p>
                 </div>
             </div>
             <div class="mt-4">
