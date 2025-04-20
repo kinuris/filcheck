@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="w-full min-h-screen bg-gray-50">
+<div class="w-full h-screen bg-gray-50">
     <div class="w-full inline-block h-full bg-white shadow-lg">
         <div class="h-16 p-4 border-b">
             <img class="h-full" src="{{ asset('assets/filcheck.svg') }}" alt="Logo">

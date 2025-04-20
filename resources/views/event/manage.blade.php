@@ -3,7 +3,7 @@
 @section('title', 'Manage Events')
 
 @section('content')
-<div class="w-full p-6 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
+<div class="w-full h-screen p-6 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
     <h1 class="text-4xl font-bold mb-8 text-white tracking-wide">Event Management</h1>
 
     <div class="flex gap-4 mb-6">

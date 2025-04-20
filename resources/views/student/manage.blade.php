@@ -3,7 +3,7 @@
 @section('title', 'Manage Students')
 
 @section('content')
-<div class="w-[calc(100vw-300px)] max-h-screen overflow-auto bg-gray-50">
+<div class="w-[calc(100vw-300px)] h-screen overflow-auto bg-gray-50">
     <div class="w-full h-full bg-white shadow-lg">
         <div class="h-16 px-6 border-b flex items-center justify-between">
             <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo" class="h-8">

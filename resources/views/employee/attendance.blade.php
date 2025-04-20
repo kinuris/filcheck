@@ -4,7 +4,7 @@
 
 @section('content')
 @include('components.view-logs-modal')
-<div class="w-[calc(100vw-300px)] min-h-screen bg-gray-50 relative">
+<div class="w-[calc(100vw-300px)] h-screen bg-gray-50 relative">
     <div class="w-full inline-block h-full bg-white shadow-lg">
         <div class="h-16 p-4 border-b">
             <img class="h-full" src="{{ asset('assets/filcheck.svg') }}" alt="Logo">

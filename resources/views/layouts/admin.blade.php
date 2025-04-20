@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <ul class="flex flex-col px-2 space-y-1 max-h-96 overflow-auto">
+            <ul class="flex flex-col px-4 space-y-1 overflow-auto"> {{-- Increased px --}}
                 @foreach([
                 ['/admin/dashboard', 'empty_dashboard', 'Dashboard'],
                 ['/student', 'groups', 'Manage Students'],
@@ -53,28 +53,37 @@
                 ['/department', 'domain', 'Departments'],
                 ['/event', 'prescriptions', 'Events'],
                 ] as [$url, $icon, $label])
-                <a href="{{ $url }}" class="group">
-                    <div class="p-2 rounded-lg flex items-center transition-all duration-300 {{ request()->is(trim($url, '/')) ? 'bg-blue-800 translate-x-2' : 'hover:bg-blue-800 hover:translate-x-2' }}">
-                        <span class="material-symbols-outlined me-2 {{ request()->is(trim($url, '/')) ? 'text-yellow-300' : 'group-hover:text-yellow-300' }}">
+                @php($isActive = request()->is(ltrim($url, '/')) || request()->is(ltrim($url, '/').'/*')) {{-- Check for sub-routes too --}}
+                <a href="{{ $url }}" class="group block"> {{-- Added block --}}
+                    <div class="px-4 py-2.5 rounded-lg flex items-center transition-all duration-200 {{ $isActive ? 'bg-blue-700 shadow-inner' : 'hover:bg-blue-800 hover:translate-x-1' }}"> {{-- Adjusted padding, active style --}}
+                        <span class="material-symbols-outlined me-3 text-lg {{ $isActive ? 'text-yellow-300' : 'text-blue-300 group-hover:text-yellow-300' }}"> {{-- Adjusted margin, size, colors --}}
                             {{ $icon }}
                         </span>
-                        <li class="font-medium text-sm {{ request()->is(trim($url, '/')) ? 'text-yellow-300' : 'group-hover:text-yellow-300' }}">
+                        <li class="font-semibold text-sm {{ $isActive ? 'text-white' : 'text-blue-100 group-hover:text-white' }}"> {{-- Adjusted font-weight, colors --}}
                             {{ $label }}
                         </li>
                     </div>
                 </a>
                 @endforeach
 
-                <div class="p-2 mt-2">
-                    <a href="/logout" class="block text-gray-400 font-medium hover:text-red-400 transition-colors duration-300 text-center text-sm">
-                        <span class="material-symbols-outlined align-middle me-2">logout</span>
-                        logout
+                {{-- Logout Button --}}
+                <div class="pt-4 mt-4 border-t border-blue-800 px-4">
+                    <a href="/logout" class="group block">
+                         <div class="px-4 py-2.5 rounded-lg flex items-center transition-all duration-200 hover:bg-red-800 hover:bg-opacity-50">
+                            <span class="material-symbols-outlined me-3 text-lg text-red-300 group-hover:text-red-200">logout</span>
+                            <li class="font-semibold text-sm text-red-200 group-hover:text-red-100">
+                                Logout
+                            </li>
+                        </div>
                     </a>
                 </div>
             </ul>
         </div>
 
-        @yield('content')
+        {{-- Main Content Area --}}
+        <main class="flex-1 h-screen overflow-y-auto bg-gray-100"> {{-- Added main tag, bg color --}}
+            @yield('content')
+        </main>
     </div>
 
     <!-- Include Choices JavaScript (latest) -->
