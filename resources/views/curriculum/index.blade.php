@@ -84,20 +84,20 @@
             <div>
                 <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-1">Teacher Assignment</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500" style="z-index: 11;">
                         <span class="material-symbols-outlined text-sm">person</span>
                     </span>
                     <select name="teacher_id" id="teacher_id"
-                        class="teacher-select w-full border border-gray-300 rounded-md pl-10 pr-3 py-2.5 appearance-none bg-white">
-                        <option value="" disabled selected>Search for a teacher...</option>
+                        class="teacher-select w-full border border-gray-300 rounded-md pl-10 pr-3 py-2.5 appearance-none bg-white" style="display: none;">
+                        <option value="" disabled {{ old('teacher_id') ? '' : 'selected' }}>Select a teacher</option>
                         @foreach(App\Models\User::where('role', 'teacher')->get() as $teacher)
                         <option value="{{ $teacher->id }}" {{ old('teacher_id') == $teacher->id ? 'selected' : '' }}>
                             {{ $teacher->getFullname() }}
                         </option>
                         @endforeach
                     </select>
-
-                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <!-- Teacher Search Input will be inserted here by JS -->
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500" style="z-index: 11;">
                         <span class="material-symbols-outlined">arrow_drop_down</span>
                     </span>
                 </div>
@@ -106,42 +106,46 @@
                 @enderror
             </div>
 
+
             <div>
                 <label for="section_id" class="block text-sm font-medium text-gray-700 mb-1">Student Section</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500" style="z-index: 11;">
                         <span class="material-symbols-outlined text-sm">group</span>
                     </span>
 
                     <select name="section" id="section_id"
-                        class="section-select w-full border border-gray-300 rounded-md pl-3 pr-3 py-2.5 appearance-none bg-white" style="display: none;">
+                        class="section-select w-full border border-gray-300 rounded-md pl-10 pr-3 py-2.5 appearance-none bg-white" style="display: none;">
                         <option value="" disabled {{ old('section') ? '' : 'selected' }}>Select a section</option>
                         @foreach(App\Models\StudentInfo::whereDoesntHave('disabledRelation')->distinct('section')->pluck('section') as $section)
                         <option value="{{ $section }}" {{ old('section') == $section ? 'selected' : '' }}>
                             @php
-                            $sectionNum = explode('-', $section)[1][0];
-                            $suffix = match((int)$sectionNum) {
-                            1 => 'st',
-                            2 => 'nd',
-                            3 => 'rd',
-                            default => 'th'
+                            $sectionParts = explode('-', $section);
+                            $year = $sectionParts[0] ?? '';
+                            $sectionNum = isset($sectionParts[1]) ? (int)filter_var($sectionParts[1], FILTER_SANITIZE_NUMBER_INT) : null;
+                            $suffix = match($sectionNum) {
+                                1 => 'st',
+                                2 => 'nd',
+                                3 => 'rd',
+                                default => 'th'
                             };
+                            $displayYear = $sectionNum ? "({$sectionNum}{$suffix} year)" : '';
                             @endphp
-                            ({{ $sectionNum }}{{ $suffix }} year) {{ $section }}
+                            {{ $displayYear }} {{ $section }}
                         </option>
                         @endforeach
                     </select>
                     <div class="section-search-wrapper relative">
                         <input type="text" id="section_search"
                             placeholder="Search for a section..."
-                            class="w-full border border-gray-300 rounded-md pl-3 pr-8 py-2.5"
+                            class="w-full border border-gray-300 rounded-md pl-10 pr-8 py-2.5"
                             autocomplete="off"
-                            value="{{ old('section') }}">
-                        <button type="button" class="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">&times;</button>
+                            value="{{ old('section') ? (App\Models\StudentInfo::where('section', old('section'))->exists() ? App\Models\StudentInfo::where('section', old('section'))->first()->section : '') : '' }}">
+                        <button type="button" class="clear-section-search absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" style="display: none;">&times;</button>
                         <div class="section-dropdown absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto hidden"></div>
                     </div>
 
-                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500" style="z-index: 11;">
                         <span class="material-symbols-outlined">arrow_drop_down</span>
                     </span>
                 </div>
@@ -287,7 +291,7 @@
                     @foreach($rooms as $room)
                     <div data-room-name="{{ $room->name }}"
                         data-room-id="{{ $room->id }}"
-                        class="bg-white rounded-lg border border-gray-200 px-5 py-4 w-72 shadow-sm hover:shadow-md 
+                        class="bg-white rounded-lg border border-gray-200 px-5 py-4 w-72 shadow-sm hover:shadow-md
                         cursor-move draggable transform hover:-translate-y-1 transition-all duration-300"
                         draggable="true"
                         ondragstart="event.dataTransfer.setData('text/plain', '{{ $room->id }}')">
@@ -427,7 +431,7 @@
                                     <h3 class="text-lg font-bold text-white">{{ $schedule->room->name }}</h3>
                                     <span class="bg-white bg-opacity-20 text-white text-xs px-2 py-0.5 rounded-md ml-3">{{ $schedule->room->building }}</span>
                                 </div>
-                                <a href="{{ route('irregular.index', $schedule->id) }}" 
+                                <a href="{{ route('irregular.index', $schedule->id) }}"
                                    class="p-1.5 bg-white bg-opacity-20 text-white rounded-md hover:bg-opacity-30 flex items-center justify-center group relative">
                                     <span class="material-symbols-outlined text-[16px]">add_task</span>
                                     <span class="absolute hidden group-hover:block right-0 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg -bottom-9 whitespace-nowrap z-10 font-medium">
@@ -505,14 +509,27 @@
 
         const searchInput = document.getElementById('section_search');
         const dropdown = document.querySelector('.section-dropdown');
-        const clearButton = searchInput.nextElementSibling;
+        const clearButton = document.querySelector('.clear-section-search');
+        const searchWrapper = document.querySelector('.section-search-wrapper');
 
-        // Set initial value if there's a selected option
-        sections.forEach(section => {
-            if (section.selected && section.value) {
-                searchInput.value = section.text;
+        // Function to get display text for a section value
+        function getSectionDisplayText(value) {
+            const found = sections.find(s => s.value === value);
+            return found ? found.text : value; // Fallback to value if not found
+        }
+
+        // Set initial value if there's an old value or selected option
+        const initialValue = searchInput.value;
+        if (initialValue) {
+            searchInput.value = getSectionDisplayText(initialValue);
+            clearButton.style.display = 'block';
+        } else {
+            const selectedOption = sections.find(s => s.selected && s.value);
+            if (selectedOption) {
+                searchInput.value = selectedOption.text;
+                clearButton.style.display = 'block';
             }
-        });
+        }
 
         // Search functionality
         searchInput.addEventListener('input', function() {
@@ -522,17 +539,22 @@
 
             renderDropdown(filtered);
             dropdown.classList.remove('hidden');
+            clearButton.style.display = this.value ? 'block' : 'none';
         });
 
         searchInput.addEventListener('focus', function() {
-            if (sections.length > 1) {
-                renderDropdown(sections.filter(s => s.value !== ''));
-                dropdown.classList.remove('hidden');
+            // Show all options on focus if input is empty or just clicked
+            const query = this.value.toLowerCase();
+            const filtered = sections.filter(s =>
+                s.text.toLowerCase().includes(query) && s.value !== '');
+            renderDropdown(filtered.length > 0 ? filtered : sections.filter(s => s.value !== ''));
+            if (sections.length > 1) { // Only show if there are actual options
+                 dropdown.classList.remove('hidden');
             }
         });
 
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.section-search-wrapper')) {
+            if (!searchWrapper.contains(e.target)) {
                 dropdown.classList.add('hidden');
             }
         });
@@ -540,8 +562,10 @@
         // Clear button functionality
         clearButton.addEventListener('click', function() {
             searchInput.value = '';
-            sectionSelect.value = '';
+            sectionSelect.value = ''; // Clear the hidden select value
             dropdown.classList.add('hidden');
+            clearButton.style.display = 'none';
+            searchInput.focus(); // Keep focus for potentially new search
         });
 
         // Render dropdown items
@@ -558,14 +582,15 @@
 
             items.forEach(item => {
                 const option = document.createElement('div');
-                option.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                option.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm';
                 option.textContent = item.text;
                 option.dataset.value = item.value;
 
                 option.addEventListener('click', function() {
-                    sectionSelect.value = this.dataset.value;
-                    searchInput.value = this.textContent;
+                    sectionSelect.value = this.dataset.value; // Set the hidden select value
+                    searchInput.value = this.textContent; // Set the visible input text
                     dropdown.classList.add('hidden');
+                    clearButton.style.display = 'block';
                 });
 
                 dropdown.appendChild(option);
@@ -577,64 +602,55 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const teacherSelect = document.getElementById('teacher_id');
-        const teachers = Array.from(teacherSelect.options).map(option => ({
-            value: option.value,
-            text: option.text
-        }));
+        const teachers = Array.from(teacherSelect.options)
+            .filter(option => option.value !== '') // Exclude the placeholder/disabled option
+            .map(option => ({
+                value: option.value,
+                text: option.text.trim() // Trim whitespace
+            }));
 
-        // Sort teachers alphabetically
+        // Sort teachers alphabetically by text (full name)
         teachers.sort((a, b) => a.text.localeCompare(b.text));
 
-        // Add search input
+        // Create wrapper for the search input and dropdown
         const searchWrapper = document.createElement('div');
-        searchWrapper.className = 'relative';
+        searchWrapper.className = 'relative teacher-search-wrapper'; // Added class for easier targeting
 
+        // Create the search input field
         const searchInput = document.createElement('input');
         searchInput.type = 'text';
-        searchInput.placeholder = 'Search for a teacher...';
-        searchInput.className = 'w-full border border-gray-300 rounded-md pl-3 pr-3 py-2.5';
+        searchInput.id = 'teacher_search'; // Added ID for potential future use
+        searchInput.placeholder = 'Search or select a teacher...';
+        searchInput.className = 'w-full border border-gray-300 rounded-md pl-10 pr-8 py-2.5'; // Adjusted padding for icon
+        searchInput.autocomplete = 'off';
 
-        // Set the old value if it exists
+        // Set the initial value in the search input if a teacher was selected (e.g., from old input)
         const selectedOption = teacherSelect.options[teacherSelect.selectedIndex];
         if (selectedOption && selectedOption.value) {
-            searchInput.value = selectedOption.text;
+            searchInput.value = selectedOption.text.trim();
         }
 
-        // Replace select with search input temporarily
+        // Insert the search wrapper before the original select (which is hidden)
         teacherSelect.parentNode.insertBefore(searchWrapper, teacherSelect);
         searchWrapper.appendChild(searchInput);
-        teacherSelect.style.display = 'none';
+        // Keep the original select hidden: teacherSelect.style.display = 'none';
 
-        // Create dropdown for results
+        // Create the dropdown container
         const dropdown = document.createElement('div');
-        dropdown.className = 'absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto hidden';
+        dropdown.className = 'teacher-dropdown absolute z-20 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto hidden shadow-lg'; // Added z-index and shadow
         searchWrapper.appendChild(dropdown);
 
-        // Add event listeners
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            const filtered = teachers.filter(t =>
-                t.text.toLowerCase().includes(query) && t.value !== '');
+        // Create and append the clear button
+        const clearButton = document.createElement('button');
+        clearButton.type = 'button';
+        clearButton.className = 'clear-teacher-search absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600';
+        clearButton.innerHTML = '&times;';
+        clearButton.style.display = searchInput.value ? 'block' : 'none'; // Show if there's initial value
+        searchWrapper.appendChild(clearButton);
 
-            renderDropdown(filtered);
-            dropdown.classList.remove('hidden');
-        });
-
-        searchInput.addEventListener('focus', function() {
-            if (searchInput.value) {
-                dropdown.classList.remove('hidden');
-            }
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!searchWrapper.contains(e.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
-
-        // Render dropdown items
+        // Function to render dropdown items
         function renderDropdown(items) {
-            dropdown.innerHTML = '';
+            dropdown.innerHTML = ''; // Clear previous items
 
             if (items.length === 0) {
                 const noResults = document.createElement('div');
@@ -646,33 +662,71 @@
 
             items.forEach(item => {
                 const option = document.createElement('div');
-                option.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                option.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm'; // Adjusted hover style
                 option.textContent = item.text;
                 option.dataset.value = item.value;
 
                 option.addEventListener('click', function() {
-                    teacherSelect.value = this.dataset.value;
-                    searchInput.value = this.textContent;
-                    dropdown.classList.add('hidden');
+                    teacherSelect.value = this.dataset.value; // Update hidden select
+                    searchInput.value = this.textContent;    // Update search input display
+                    dropdown.classList.add('hidden');       // Hide dropdown
+                    clearButton.style.display = 'block';    // Show clear button
                 });
 
                 dropdown.appendChild(option);
             });
         }
 
-        // Add clear button
-        const clearButton = document.createElement('button');
-        clearButton.type = 'button';
-        clearButton.className = 'absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600';
-        clearButton.innerHTML = '&times;';
-        clearButton.addEventListener('click', function() {
-            searchInput.value = '';
-            teacherSelect.value = '';
-            dropdown.classList.add('hidden');
+        // Event listener for input/typing in the search field
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            const filtered = teachers.filter(t =>
+                t.text.toLowerCase().includes(query)
+            );
+            renderDropdown(filtered);
+            dropdown.classList.remove('hidden'); // Show dropdown with filtered results
+            clearButton.style.display = this.value ? 'block' : 'none'; // Toggle clear button
         });
-        searchWrapper.appendChild(clearButton);
+
+        // Event listener for focusing on the search field
+        searchInput.addEventListener('focus', function() {
+            const query = this.value.toLowerCase().trim();
+            // Show all teachers if input is empty, otherwise show filtered based on current input
+            const itemsToShow = query === '' ? teachers : teachers.filter(t => t.text.toLowerCase().includes(query));
+            renderDropdown(itemsToShow);
+            if (teachers.length > 0) { // Only show if there are teachers
+                 dropdown.classList.remove('hidden');
+            }
+        });
+
+        // Event listener to hide the dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            // Hide if the click is outside the search wrapper
+            if (!searchWrapper.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Event listener for the clear button
+        clearButton.addEventListener('click', function() {
+            searchInput.value = '';          // Clear search input
+            teacherSelect.value = '';        // Clear hidden select
+            dropdown.classList.add('hidden'); // Hide dropdown
+            clearButton.style.display = 'none'; // Hide clear button
+            searchInput.focus();             // Refocus the input to potentially show all options again
+        });
+
+         // Initial population of the dropdown if focused immediately (e.g., tabbing)
+         // This might be redundant with the focus listener but ensures initial state
+         if (document.activeElement === searchInput) {
+             renderDropdown(teachers);
+             if (teachers.length > 0) {
+                 dropdown.classList.remove('hidden');
+             }
+         }
     });
 </script>
+
 
 <script>
     <?php if (session('openModal') == 1): ?>
@@ -680,20 +734,65 @@
     <?php endif ?>
 
     function onDropRoom(event, elem) {
-        elem.classList.remove('bg-blue-400');
-        const roomId = event.dataTransfer.getData('text/plain');
+        // Prevent default drop behavior which might be navigation
+        event.preventDefault();
 
-        const subjectId = elem.querySelector('p.text-sm.id-tag').textContent.replace('#', '');
-        const roomName = document.querySelector(`[data-room-name][data-room-id="${roomId}"]`).getAttribute('data-room-name');
+        // Remove visual dragover cues
+        elem.classList.remove('bg-blue-100', 'border-blue-400', 'scale-105', 'shadow-lg');
+
+        // Get data from the dragged element (Room)
+        const roomId = event.dataTransfer.getData('text/plain');
+        const roomElement = document.querySelector(`[data-room-id="${roomId}"]`);
+        if (!roomElement) {
+            console.error('Could not find dragged room element for ID:', roomId);
+            return; // Exit if the dragged element can't be found
+        }
+        const roomName = roomElement.getAttribute('data-room-name');
+
+        // Get data from the drop target element (Subject)
+        const subjectId = elem.getAttribute('data-subject-id'); // Use data attribute directly
         const subjectName = elem.getAttribute('data-subject-name');
 
-        document.getElementById('room_name').value = roomName;
-        document.getElementById('subject_name').value = subjectName;
+        if (!roomId || !roomName || !subjectId || !subjectName) {
+             console.error('Missing data for room or subject.', { roomId, roomName, subjectId, subjectName });
+             alert('Error: Could not retrieve room or subject details. Please try again.');
+             return;
+        }
 
-        toggleModal('setupScheduleModal');
 
-        document.getElementById('room_id').value = roomId;
-        document.getElementById('subject_id').value = subjectId;
+        // Populate the modal fields
+        const roomNameInput = document.getElementById('room_name');
+        const subjectNameInput = document.getElementById('subject_name');
+        const roomIdInput = document.getElementById('room_id');
+        const subjectIdInput = document.getElementById('subject_id');
+
+        if (roomNameInput && subjectNameInput && roomIdInput && subjectIdInput) {
+            roomNameInput.value = roomName;
+            subjectNameInput.value = subjectName;
+            roomIdInput.value = roomId;
+            subjectIdInput.value = subjectId;
+
+            // Open the modal
+            toggleModal('setupScheduleModal');
+        } else {
+            console.error('Could not find one or more modal input fields.');
+            alert('Error: Could not prepare the schedule setup form. Please check the console.');
+        }
     }
+
+    // Add dragover handler to subject elements to provide visual feedback
+    document.querySelectorAll('[data-subject-id]').forEach(subjectDiv => {
+        subjectDiv.addEventListener('dragover', function(event) {
+            event.preventDefault(); // Necessary to allow dropping
+            // Add classes for visual feedback (already handled by inline ondragover, but good practice)
+            // this.classList.add('bg-blue-100', 'border-blue-400', 'scale-105', 'shadow-lg');
+        });
+        subjectDiv.addEventListener('dragleave', function(event) {
+            // Remove classes when dragging leaves (already handled by inline ondragleave)
+            // this.classList.remove('bg-blue-100', 'border-blue-400', 'scale-105', 'shadow-lg');
+        });
+        // The ondrop is handled by the inline attribute calling onDropRoom()
+    });
+
 </script>
 @endsection

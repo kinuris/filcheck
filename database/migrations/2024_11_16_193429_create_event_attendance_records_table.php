@@ -16,11 +16,13 @@ return new class extends Migration
 
             $table->foreignId('student_info_id')
                 ->references('id')
-                ->on('student_infos');
+                ->on('student_infos')
+                ->onDelete('cascade');
             
             $table->foreignId('event_id')
                 ->references('id')
-                ->on('events');
+                ->on('events')
+                ->onDelete('cascade');
 
             $table->enum('type', ['ENTER', 'EXIT']);
             $table->time('time');

@@ -49,8 +49,8 @@
 
                         <select name="section" class="bg-white/95 rounded-md text-sm p-2 border-0 shadow-sm">
                             <option value="">All Sections</option>
-                            @foreach(App\Models\StudentInfo::distinct('section')->get() ?? [] as $section)
-                                <option value="{{ $section->section }}" {{ request()->query('section') == $section->section ? 'selected' : '' }}>{{ $section->section ?: 'Unassigned' }}</option>
+                            @foreach(App\Models\StudentInfo::query()->get()->pluck('section')->unique() ?? [] as $section)
+                                <option value="{{ $section }}" {{ request()->query('section') == $section ? 'selected' : '' }}>{{ $section ?: 'Unassigned' }}</option>
                             @endforeach
                         </select>
 
@@ -71,48 +71,81 @@
 
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                const search = document.getElementById('course-search');
+                                const form = document.querySelector('form[action="/student"]'); // Target the correct form
+                                const searchInput = document.getElementById('search');
+                                const yearSelect = document.querySelector('select[name="year"]');
+                                const genderSelect = document.querySelector('select[name="gender"]');
+                                const sectionSelect = document.querySelector('select[name="section"]');
+
+                                const courseSearch = document.getElementById('course-search');
                                 const dropdown = document.getElementById('course-dropdown');
                                 const hiddenInput = document.getElementById('course-value');
                                 const options = dropdown.querySelectorAll('div');
 
+                                // Function to submit the form
+                                const submitForm = () => {
+                                    // Small delay to allow inputs like course selection to update value
+                                    setTimeout(() => form.submit(), 100);
+                                };
+
+                                // Add listeners to standard selects
+                                yearSelect?.addEventListener('change', submitForm);
+                                genderSelect?.addEventListener('change', submitForm);
+                                sectionSelect?.addEventListener('change', submitForm);
+
+                                // Add listener to main search input (on blur)
+                                searchInput?.addEventListener('blur', submitForm);
+
+                                // --- Course Search Logic ---
                                 // Set initial display value
                                 const selectedValue = hiddenInput.value;
                                 if (selectedValue) {
                                     const selectedOption = Array.from(options).find(opt => opt.dataset.value === selectedValue);
-                                    if (selectedOption) search.value = selectedOption.textContent;
+                                    if (selectedOption) courseSearch.value = selectedOption.textContent;
+                                } else {
+                                    // Ensure placeholder is shown if no value
+                                    courseSearch.placeholder = "Search courses...";
                                 }
 
-                                search.addEventListener('focus', () => dropdown.classList.remove('hidden'));
-                                search.addEventListener('input', filterOptions);
+                                courseSearch.addEventListener('focus', () => dropdown.classList.remove('hidden'));
+                                courseSearch.addEventListener('input', filterOptions);
 
                                 document.addEventListener('click', (e) => {
-                                    if (!search.contains(e.target) && !dropdown.contains(e.target)) {
+                                    if (!courseSearch.contains(e.target) && !dropdown.contains(e.target)) {
                                         dropdown.classList.add('hidden');
                                     }
                                 });
 
                                 options.forEach(option => {
                                     option.addEventListener('click', () => {
-                                        search.value = option.textContent;
+                                        const previousValue = hiddenInput.value;
+                                        courseSearch.value = option.textContent === 'All Courses' ? '' : option.textContent; // Clear input if 'All Courses'
+                                        courseSearch.placeholder = option.textContent === 'All Courses' ? 'All Courses' : 'Search courses...'; // Update placeholder
                                         hiddenInput.value = option.dataset.value;
                                         dropdown.classList.add('hidden');
+                                        // Submit only if the value actually changed
+                                        if (previousValue !== hiddenInput.value) {
+                                            submitForm();
+                                        }
                                     });
                                 });
 
                                 function filterOptions() {
-                                    const filter = search.value.toLowerCase();
+                                    const filter = courseSearch.value.toLowerCase();
                                     options.forEach(option => {
                                         const text = option.textContent.toLowerCase();
                                         option.style.display = text.includes(filter) ? '' : 'none';
                                     });
+                                    // Show 'All Courses' always if search is empty or it matches
+                                    const allCoursesOption = dropdown.querySelector('div[data-value=""]');
+                                    if (allCoursesOption && (filter === '' || 'all courses'.includes(filter))) {
+                                        allCoursesOption.style.display = '';
+                                    }
                                 }
+                                // Initial filter on load if needed
+                                // filterOptions();
                             });
                         </script>
-
-                        <button type="submit" class="bg-blue-600 text-white text-sm px-4 rounded-md hover:bg-blue-700 transition-colors">
-                            Apply Filters
-                        </button>
                     </div>
                 </form>
             </div>
@@ -133,7 +166,7 @@
                             class="w-4 h-4 rounded border-white/20 focus:ring-blue-400 focus:ring-offset-2"
                             onchange="window.location.href = `{{ request()->fullUrlWithQuery(['show_disabled' => request()->query('show_disabled') ? null : '1']) }}`"
                             {{ request()->query('show_disabled') ? 'checked' : '' }}>
-                        <span>Show Deactivated Students</span>
+                        <span>Show Decommissioned Students</span>
                     </label>
                 </div>
             </div>
@@ -181,7 +214,7 @@
                             <td class="px-6 py-3 text-gray-600 truncate max-w-[180px] {{ $student->disabled() ? 'text-gray-400' : '' }}">{{ $student->address }}</td>
                             <td class="px-6 py-3 {{ $student->disabled() ? 'text-gray-400' : '' }}">
                                 @if ($student->disabled())
-                                <span class="text-xs bg-gray-200 text-gray-600 px-2.5 py-1 rounded-full">Deactivated</span>
+                                <span class="text-xs bg-gray-200 text-gray-600 px-2.5 py-1 rounded-full">Decommissioned</span>
                                 @else
                                 <span class="font-medium">{{ $student->rfid }}</span>
                                 @endif

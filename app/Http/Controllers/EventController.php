@@ -46,11 +46,11 @@ class EventController extends Controller
 
         $event->update($validated);
 
-        if (isset($validated['sections'])) {
-            EventAttendance::query()
-                ->where('event_id', '=', $event->id)
-                ->delete();
+        EventAttendance::query()
+            ->where('event_id', '=', $event->id)
+            ->delete();
 
+        if (isset($validated['sections'])) {
             foreach ($validated['sections'] as $section) {
                 $students = StudentInfo::query()
                     ->where('section', '=', $section)
@@ -168,6 +168,12 @@ class EventController extends Controller
             ->where('rfid', '=', $rfid)
             ->first();
 
+        if (is_null($student)) {
+            return response()->json([
+                'error' => 'Student not found',
+            ], 404);
+        }
+
         $expected = SubjectEventAttendance::query()->where('event_id', '=', $request->json('event_id'))->where('student_info_id', '=', $student->id)->first();
         if ($expected !== null) {
             $lastRecord = $expected->logs()->latest()->first();
@@ -182,11 +188,22 @@ class EventController extends Controller
             $record->save();
         }
 
+        $existing = EventAttendance::query()->where('student_info_id', '=', $student->id)
+            ->where('event_id', '=', $request->json('event_id'));
+
+        if (!$existing->exists()) {
+            return response()->json([
+                'error' => 'Student not registered in this event',
+                'student' => $student,
+            ], 405);
+        }
+
         $lastRecord = EventAttendanceRecord::query()
             ->where('student_info_id', '=', $student->id)
             ->where('event_id', '=', $request->json('event_id'))
             ->latest()
             ->first();
+
 
         $record = EventAttendanceRecord::query()->create([
             'student_info_id' => $student->id,
