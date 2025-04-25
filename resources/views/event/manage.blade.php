@@ -11,6 +11,7 @@
             <span class="material-symbols-outlined">settings</span>
             <span class="font-semibold">Setup Event Node</span>
         </a>
+        
 
         <div class="flex-1"></div>
 
