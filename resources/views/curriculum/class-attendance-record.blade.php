@@ -6,7 +6,7 @@
 <div class="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 w-full">
     <div class="w-full bg-white shadow-lg">
         <div class="container mx-auto h-16 px-6 flex items-center">
-            <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo" class="h-8">
+            <img src="{{ asset('assets/filcheck.png') }}" alt="Logo" class="h-8">
         </div>
     </div>
 

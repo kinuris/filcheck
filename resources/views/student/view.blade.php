@@ -22,7 +22,7 @@
 
     {{-- Navbar - Use vh for height, vw for padding and logo height --}}
     <nav class="bg-white/95 backdrop-blur-sm shadow-md flex items-center flex-shrink-0 h-[8vh]">
-        <img class="h-[6vh] px-[2vw]" src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
+        <img class="h-[6vh] px-[2vw]" src="{{ asset('assets/filcheck.png') }}" alt="Logo">
     </nav>
 
     {{-- Main Content Area - Grows to fill available space. Use vw for padding --}}

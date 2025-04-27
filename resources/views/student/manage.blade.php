@@ -6,7 +6,7 @@
 <div class="w-[calc(100vw-300px)] h-screen overflow-auto bg-gray-50">
     <div class="w-full h-full bg-white shadow-lg">
         <div class="h-16 px-6 border-b flex items-center justify-between">
-            <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo" class="h-8">
+            <img src="{{ asset('assets/filcheck.png') }}" alt="Logo" class="h-8">
         </div>
         <div class="flex flex-col p-8 bg-gradient-to-r from-blue-700 to-blue-500 h-full">
             <div class="flex w-full mb-8 justify-between items-center">

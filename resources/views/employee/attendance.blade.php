@@ -7,7 +7,7 @@
 <div class="w-[calc(100vw-300px)] h-screen bg-gray-50 relative">
     <div class="w-full inline-block h-full bg-white shadow-lg">
         <div class="h-16 p-4 border-b">
-            <img class="h-full" src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
+            <img class="h-full" src="{{ asset('assets/filcheck.png') }}" alt="Logo">
         </div>
 
         <div class="flex flex-col p-8 mb-16 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 h-[calc(100%-8rem)]">

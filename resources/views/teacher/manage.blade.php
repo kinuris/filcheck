@@ -4,7 +4,7 @@
 <div class="w-full h-screen bg-gray-50">
     <div class="w-full inline-block h-full bg-white shadow-lg">
         <div class="h-16 p-4 border-b">
-            <img class="h-full" src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
+            <img class="h-full" src="{{ asset('assets/filcheck.png') }}" alt="Logo">
         </div>
         <div class="p-6 mb-16 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 h-[calc(100%-8rem)]">
             <div class="flex w-full mb-6 justify-between items-center">

@@ -245,7 +245,7 @@
     <div class="w-full bg-white shadow-lg">
         <div class="container mx-auto h-16 p-4 flex items-center justify-between">
             <div class="flex items-center">
-                <img src="{{ asset('assets/filcheck.svg') }}" alt="FilCheck Logo" class="h-8">
+                <img src="{{ asset('assets/filcheck.png') }}" alt="FilCheck Logo" class="h-8">
                 <span class="ml-3 text-gray-700 font-semibold text-lg">|</span>
                 <span class="ml-3 text-gray-700 font-semibold text-lg">Academic Programs</span>
             </div>

@@ -5,7 +5,7 @@
     @include('includes.receiver-notifier')
     <div class="w-full inline-block min-h-[calc(100%-4rem)] max-h-[calc(100%-1rem)] overflow-auto bg-white">
         <div class="h-16 p-4">
-            <img src="{{ asset('assets/filcheck.svg') }}" alt="Logo">
+            <img src="{{ asset('assets/filcheck.png') }}" alt="Logo">
         </div>
         <div class="p-6 bg-gradient-to-r from-blue-500 to-blue-600">
             <div class="rounded-xl shadow-2xl bg-white min-h-[calc(100%-4rem)] max-h-[calc(100%-1rem)] overflow-auto">

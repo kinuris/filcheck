@@ -45,7 +45,7 @@
             <div class="relative min-h-screen flex items-center justify-center px-4">
                 <div class="bg-white/95 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md">
                     <div class="flex justify-center mb-6">
-                        <img class="h-20" src="{{ asset('assets/filcheck.svg') }}" alt="FilCheck Logo">
+                        <img class="h-20" src="{{ asset('assets/filcheck.png') }}" alt="FilCheck Logo">
                     </div>
                     <h1 class="text-center text-3xl font-bold text-gray-800 mb-8">Welcome</h1>
 
