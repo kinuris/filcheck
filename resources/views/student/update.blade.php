@@ -318,7 +318,7 @@
     <!-- @include('includes.receiver-notifier') -->
     <div class="w-full inline-block h-full bg-white">
         <div class="h-16 p-4">
-            <img src="{{ asset('assets/filcheck.png') }}" alt="Logo">
+            <img class="h-10" src="{{ asset('assets/filcheck.png') }}" alt="Logo">
         </div>
         <div class="p-4  bg-gradient-to-r from-blue-500 to-blue-600">
             <div class="rounded-lg shadow-lg bg-white min-h-[calc(100%-4rem)] max-h-[calc(100%-1rem)] overflow-auto">
