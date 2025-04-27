@@ -347,6 +347,12 @@
         // Optionally try to reconnect or inform the user more permanently
     });
 
+    stream.addEventListener('open', function(e) {
+        console.log("Connection established");
+        updateStatus('Connected to Scanning Service', 'success');
+        animateNotification('Connected', 'Ready to scan RFID tags.', 'success');
+    });
+
     // Initial state
     resetStudentInfo();
     updateStatus('Waiting for Scan...', 'info');
