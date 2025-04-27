@@ -392,7 +392,7 @@
                                     <div class="relative">
                                         <label class="block text-sm font-medium text-gray-700 mb-1" for="department">Department</label>
                                         <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="department" id="department">
-                                            @php($departments = \App\Models\Department::all())
+                                            @php $departments = \App\Models\Department::all(); @endphp
                                             @foreach($departments as $department)
                                             <option value="{{ $department->id }}" {{ $student->department_id == $department->id ? 'selected' : '' }}>{{ $department->name }} ({{ $department->code }})</option>
                                             @endforeach
@@ -457,7 +457,7 @@
                                             @error('year')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                                         </div>
 
-                                        @php([$sectCode, $sectLetter] = $student->getCodeAndSection())
+                                        @php [$sectCode, $sectLetter] = $student->getCodeAndSection(); @endphp
 
                                         <div class="col-span-2 relative">
                                             <label class="block text-sm font-medium text-gray-700 mb-1" for="section_letter">Section</label>
