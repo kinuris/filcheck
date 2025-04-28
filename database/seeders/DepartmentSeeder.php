@@ -18,7 +18,7 @@ class DepartmentSeeder extends Seeder
             "College of Arts and Sciences",
             "College of Business and Accountancy",
             "College of Engineering",
-            "College of Information Technology",
+            "College of Computer Studies",
             "College of Education",
             "College of Nursing",
             "College of Medicine",

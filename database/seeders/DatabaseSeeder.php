@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             'middle_name' => fake()->optional()->lastName(),
             'last_name' => fake()->lastName(),
             'rfid' => str_pad(fake()->unique()->randomNumber(8), 10, '0'),
-            'department_id' => Department::all()->random()->id,
+            'department_id' => Department::query()->where('name', 'College of Computer Studies')->first()->id,
             'profile_picture' => fake()->imageUrl(),
             'role' => 'Admin',
             'gender' => 'Male',
